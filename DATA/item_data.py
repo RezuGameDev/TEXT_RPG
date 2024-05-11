@@ -311,7 +311,7 @@ Iron_Shield = {
     "ID": 17,
     "name": "Iron Shield",
     "rarity": "Common",
-    "Physical_Resist" : 0.02,
+    "Physical_Resist" : 0.02, # max 0.15
     "type": 7,
     "minGold": 25,
     "maxGold": 36,
@@ -321,7 +321,7 @@ Iron_Armor = {
     "ID": 18,
     "name": "Iron Armor",
     "rarity": "Common",
-    "Physical_Resist" : 0.05,
+    "Physical_Resist" : 0.05, # max 0.4
     "type": 3,
     "minGold": 28,
     "maxGold": 39,
@@ -331,7 +331,7 @@ Iron_Helm = {
     "ID": 19,
     "name": "Iron Helm",
     "rarity": "Common",
-    "Physical_Resist" : 0.03,
+    "Physical_Resist" : 0.03, # max 0.1
     "type": 3,
     "minGold": 25,
     "maxGold": 36,
@@ -349,18 +349,21 @@ Wooden_Staff = {
     "info" : "damage + 1 | mana + 15"
 }
 
-
+# All Pountions
 alchemical_items = [Health_Potion_1, Health_Potion_2, Health_Potion_3, Health_Potion_4, Health_Potion_5,
                     Mana_Elixir_1, Mana_Elixir_2, Mana_Elixir_3, Mana_Elixir_4, Mana_Elixir_5,
                     Strength_Tonic_1, Strength_Tonic_2, Strength_Tonic_3, Strength_Tonic_4, Strength_Tonic_5]
 
+# All Armor
 blacksmith_items = [Iron_Sword, Iron_Dagger, Iron_Shield, Iron_Armor, Iron_Helm]
 
+# All Iten
 all_item = [Health_Potion_1, Health_Potion_2, Health_Potion_3, Health_Potion_4, Health_Potion_5,
             Mana_Elixir_1, Mana_Elixir_2, Mana_Elixir_3, Mana_Elixir_4, Mana_Elixir_5,
             Strength_Tonic_1, Strength_Tonic_2, Strength_Tonic_3, Strength_Tonic_4, Strength_Tonic_5,
             Iron_Sword, Iron_Dagger, Iron_Shield, Iron_Armor, Iron_Helm]
 
+#  ID  \ foncrionName
 potions_use_functions = {
     0: HealthPotion_1,
     1: HealthPotion_2,
