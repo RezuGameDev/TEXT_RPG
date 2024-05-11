@@ -12,6 +12,8 @@ forest = {
         "PhysicalDamage" : True,
         "MagicDamage" : False,
         "Description" : "green, big ears, short stature, sharp talons.",
+        "Full Description" : "Goblins are usually the dumbest group that live in the forest. Although, sometimes they can surprise you with their clever inventions on the road. \
+        Goblins may appear weak alone, but in group, they can overwhelm you quite fast. So, be cautious about their number! Unless you plan to annihilate them all at once...",
         "speed" : 5,
     },
     "forest_troll": {
@@ -27,6 +29,8 @@ forest = {
         "PhysicalDamage" : True,
         "MagicDamage" : False,
         "Description" : "green, a big increase, frizzy green hair with beard, body hair.",
+        "Full Description" : "Forest Trolls are simple minded, but physically strong. They normally like to compete with each other to test their strength. \
+        On rare occasions, you may spot some trolls to toy with goblins for boredom.",
         "speed" : 3,
     },
     "forest_witcher": {
@@ -42,6 +46,8 @@ forest = {
         "PhysicalDamage" : True,
         "MagicDamage" : False,
         "Description" : "camouflage raincoat covering the face, long staff.",
+        "Full Description" : "Forest Witchers are the guards of the forest and work under one or multiple Forest Magicians. Their camouflage raincoat makes them \
+        hard to spot on the nature and their staffs gives them versatile close combat benefits that would make even famous Donatello-turtle jealous.",
         "speed" : 4,
     },
     "wooden_ent": {
@@ -57,6 +63,8 @@ forest = {
         "PhysicalDamage" : True,
         "MagicDamage" : False,
         "Description" : "sliver skin, wooden body texture, claim face.",
+        "Full Description" : "Wooden Ents are the oldest creatures of the forest area. Their sturdy wooden sliver skin makes them tough opponents for physical attacks, but \
+        if you were to try some fire spells on them... Well, then you at least have some Minecraft's coal for your torches or fireplace.",
         "speed" : 2,
     },
     "forest_ghost": {
@@ -72,6 +80,9 @@ forest = {
         "PhysicalDamage" : False,
         "MagicDamage" : True,
         "Description" : "invisible, nimble, quiet, secretive, good hearing.",
+        "Full Description" : "Forest Ghosts are the spirit form of deceased creatures that lived in the forest. They are mostly invisible, nimble, quiet and somewhat secretive. They say that \
+        Forest Ghosts have so good hearing that if were to whisper their name 100 meters away from them, they would still hear you and teleport mystically behind you. On the \
+        other hand, others say that if you were to fart near them, they wouldn't even notice. Truly mysterious creatures.",
         "speed" : 5,
     },
     "forest_wildSquirrel": {
@@ -87,6 +98,9 @@ forest = {
         "PhysicalDamage" : True,
         "MagicDamage" : False,
         "Description" : "fast, aggressive, small, weak",
+        "Full Description" : "These little chipmunks used to live in peace with everyone until one day someone started to steal their precious cones from their homes. Locals reported \
+        one time that some of them saw a human with black cape stealing the cones right in front of one of the Forest WildSquirrels. Since then they became very aggressive towards anyone \
+        who happened to cross paths with them.",
         "speed" : 7,
     },
     "forest_magician": {
@@ -102,6 +116,9 @@ forest = {
         "PhysicalDamage" : False,
         "MagicDamage" : True,
         "Description" : "black robe, static, dangerous, mysterious",
+        "Full Description" : "Forest Magicians. The leaders of the forest area and commanders of the Forest Witchers. Their outlook resemble humans, but nobody has ever being able to return \
+        back to the village alive after facing them. That's why there's very little information available about them. Adventurers Guilds have even put a bounty on one of them, so their identity \
+        could be studied and finally revealed.",
         "speed" : 5,
     }
 }
