@@ -89,6 +89,7 @@ forest = {
         other hand, others say that if you were to fart near them, they wouldn't even notice. Truly mysterious creatures.",
         "Description" : "A spectral wraith haunting the depths of the forest, the forest ghost is an ephemeral entity shrouded in wisps of ethereal mist. Its form flickers in and out of sight, its movements silent and elusive as it stalks its prey with otherworldly grace. Only the keenest of senses can detect its presence before it strikes from the shadows.",
         "speed" : 5,
+    },
 
     "forest_wildSquirrel": {
         "name": "forest wildSquirrel",
