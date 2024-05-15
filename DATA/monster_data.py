@@ -11,6 +11,9 @@ forest = {
         "agresia" : 0.6,
         "PhysicalDamage" : True,
         "MagicDamage" : False,
+        "Description" : "green, big ears, short stature, sharp talons.",
+        "Full Description" : "Goblins are usually the dumbest group that live in the forest. Although, sometimes they can surprise you with their clever inventions on the road. \
+        Goblins may appear weak alone, but in group, they can overwhelm you quite fast. So, be cautious about their number! Unless you plan to annihilate them all at once...",
         "Description" : " A mischievous creature of the forest, the goblin is a diminutive humanoid with green skin, protruding ears, and a hunched stature. Its sharp, claw-like talons and keen eyesight make it a skilled hunter and scavenger, often found lurking in the shadows of the woodland.",
         "speed" : 5,
     },
@@ -26,6 +29,9 @@ forest = {
         "agresia" : 0.76,
         "PhysicalDamage" : True,
         "MagicDamage" : False,
+        "Description" : "green, a big increase, frizzy green hair with beard, body hair.",
+        "Full Description" : "Forest Trolls are simple minded, but physically strong. They normally like to compete with each other to test their strength. \
+        On rare occasions, you may spot some trolls to toy with goblins for boredom.",
         "Description" : "Towering over the trees, the forest troll is a massive, lumbering brute with thick, gnarled skin and wild, frizzy green hair cascading down its broad shoulders. Its muscular frame and brutish demeanor exude an aura of intimidation, marking it as a formidable adversary within the depths of the forest.",
         "speed" : 3,
     },
@@ -41,6 +47,9 @@ forest = {
         "agresia" : 0.86,
         "PhysicalDamage" : True,
         "MagicDamage" : False,
+        "Description" : "camouflage raincoat covering the face, long staff.",
+        "Full Description" : "Forest Witchers are the guards of the forest and work under one or multiple Forest Magicians. Their camouflage raincoat makes them \
+        hard to spot on the nature and their staffs gives them versatile close combat benefits that would make even famous Donatello-turtle jealous.",
         "Description" : "Cloaked in a camouflage raincoat that blends seamlessly with the forest foliage, the forest witcher is a solitary figure wielding a long, gnarled staff adorned with mystical runes. Its obscured visage hints at a mysterious past, and its mastery of nature's magic makes it a formidable protector of the woodland realm.",
         "speed" : 4,
     },
@@ -56,6 +65,9 @@ forest = {
         "agresia" : 0.89,
         "PhysicalDamage" : True,
         "MagicDamage" : False,
+        "Description" : "sliver skin, wooden body texture, claim face.",
+        "Full Description" : "Wooden Ents are the oldest creatures of the forest area. Their sturdy wooden sliver skin makes them tough opponents for physical attacks, but \
+        if you were to try some fire spells on them... Well, then you at least have some Minecraft's coal for your torches or fireplace.",
         "Description" : "Rising from the forest floor like a towering colossus, the wooden ent is an ancient guardian of the woods, its massive form composed of gnarled bark and intertwined roots. Its eyes, like pools of ancient wisdom, survey the forest with a watchful gaze, and its towering presence commands respect from all who dare to enter its domain.",
         "speed" : 2,
     },
@@ -71,6 +83,10 @@ forest = {
         "agresia" : 0.9,
         "PhysicalDamage" : False,
         "MagicDamage" : True,
+        "Description" : "invisible, nimble, quiet, secretive, good hearing.",
+        "Full Description" : "Forest Ghosts are the spirit form of deceased creatures that lived in the forest. They are mostly invisible, nimble, quiet and somewhat secretive. They say that \
+        Forest Ghosts have so good hearing that if were to whisper their name 100 meters away from them, they would still hear you and teleport mystically behind you. On the \
+        other hand, others say that if you were to fart near them, they wouldn't even notice. Truly mysterious creatures.",
         "Description" : "A spectral wraith haunting the depths of the forest, the forest ghost is an ephemeral entity shrouded in wisps of ethereal mist. Its form flickers in and out of sight, its movements silent and elusive as it stalks its prey with otherworldly grace. Only the keenest of senses can detect its presence before it strikes from the shadows.",
         "speed" : 5,
     },
@@ -102,6 +118,10 @@ forest = {
         "agresia" : 0.9,
         "PhysicalDamage" : True,
         "MagicDamage" : False,
+        "Description" : "fast, aggressive, small, weak",
+        "Full Description" : "These little chipmunks used to live in peace with everyone until one day someone started to steal their precious cones from their homes. Locals reported \
+        one time that some of them saw a human with black cape stealing the cones right in front of one of the Forest WildSquirrels. Since then they became very aggressive towards anyone \
+        who happened to cross paths with them.",
         "Description" : "Darting through the underbrush with lightning speed, the forest wild squirrel is a small yet ferocious creature with fur as dark as the shadows beneath the canopy. Its sharp claws and teeth are honed to a razor's edge, and its agile movements make it a blur of motion as it defends its territory with unwavering tenacity.",
         "speed" : 7,
     },
@@ -117,6 +137,10 @@ forest = {
         "agresia" : 0.7,
         "PhysicalDamage" : False,
         "MagicDamage" : True,
+        "Description" : "black robe, static, dangerous, mysterious",
+        "Full Description" : "Forest Magicians. The leaders of the forest area and commanders of the Forest Witchers. Their outlook resemble humans, but nobody has ever being able to return \
+        back to the village alive after facing them. That's why there's very little information available about them. Adventurers Guilds have even put a bounty on one of them, so their identity \
+        could be studied and finally revealed.",
         "Description" : "Enshrouded in a billowing cloak of midnight black, the forest magician is a figure of dark mystery and arcane power. Its eyes gleam with an otherworldly intensity, and its hands crackle with the energy of forbidden spells. Within its grasp lies the secrets of the forest's darkest magic, ready to be unleashed upon any who dare to cross its path.",
         "speed" : 5,
     },
