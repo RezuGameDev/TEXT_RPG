@@ -295,7 +295,7 @@ Iron_Sword = {
     "type": 4,
     "minGold": 23,
     "maxGold": 34,
-    "info" : "Damage + 15"
+    "info" : "10 Damage"
 }
 Iron_Dagger = {
     "ID": 16,
@@ -305,7 +305,7 @@ Iron_Dagger = {
     "type": 5,
     "minGold": 15,
     "maxGold": 26,
-    "info" : "Damage + 7"
+    "info" : "5 Damage"
 }
 Iron_Shield = {
     "ID": 17,

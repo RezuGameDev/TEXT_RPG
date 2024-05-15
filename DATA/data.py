@@ -1,5 +1,5 @@
 import os
-
+# Whats up man its me lol
 # Очистка экрана
 def clear():
     os.system("cls")
