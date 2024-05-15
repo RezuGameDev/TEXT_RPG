@@ -89,22 +89,6 @@ forest = {
         other hand, others say that if you were to fart near them, they wouldn't even notice. Truly mysterious creatures.",
         "Description" : "A spectral wraith haunting the depths of the forest, the forest ghost is an ephemeral entity shrouded in wisps of ethereal mist. Its form flickers in and out of sight, its movements silent and elusive as it stalks its prey with otherworldly grace. Only the keenest of senses can detect its presence before it strikes from the shadows.",
         "speed" : 5,
-    },
-     "forest_kashechei": {
-        "name": "forest kashechei",
-        "Hp": 9999999,
-        "Damage": 6,
-        "Xp": 800,
-        "Coin": 1000,
-        "PhysicalResist": 0.5,
-        "MagicResist": 0.7,
-        "PoisonResist": 0.9,
-        "agresia" : 0.4,
-        "PhysicalDamage" : False,
-        "MagicDamage" : True,
-        "Description" : "Crowned with an immortal diadem, the forest kashechei is a skeletal figure draped in tattered robes, its pale, emaciated form hinting at the passage of countless ages. Bound to the forest by ancient magic, it stands as a sentinel against intruders, its bony fingers ready to unleash arcane fury upon any who dare to challenge its dominion.",
-        "speed" : 1,
-    },
 
     "forest_wildSquirrel": {
         "name": "forest wildSquirrel",
