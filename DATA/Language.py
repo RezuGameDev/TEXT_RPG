@@ -7,7 +7,7 @@ translations = {
         'graphics': "Graphics: Fantomm",
         'music': "Music: Fantomm",
         'code': "Code: Fantomm",
-        'plot': "Plot: Факсянь",
+        'plot': "Plot: Факсянь ---ihateniggers",
         'new_game': "[1] New game",
         'load_game': "[2] Load game",
         'authors': "[3] Authors",
