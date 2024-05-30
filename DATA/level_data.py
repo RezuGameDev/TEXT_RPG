@@ -44,7 +44,7 @@ settlementMapGUI_1 = [
     " *                                           * ",
     " *                                           * ",
     "*                                             *",
-    "*                                             *",
+    "*                      0                      *",
     "*                                             *",
     "*                                             *",
     "*                                             *",
@@ -55,7 +55,7 @@ settlementMapGUI_1 = [
     "    *                                     *    ",
     "     **                                 **     ",
     "       ***                           ***       ",
-    "          ****                   ****          ",
+    "          ****         ƒ         ****          ",
     "              *******************              ",
 ]
 
@@ -66,6 +66,13 @@ class layer1():
     XBoss, YBoss = 7, 7  # Координаты босса (₲)
     XExit, YExit = 31, 3  # Координаты выхода (ʘ)
     monsterMax = 87
+
+class settlement1():
+    Name = ""
+    XSpawn, YSpawn = 25, 19  # Координаты точки спауна (ƒ)
+    XSettlements, YSettlements = 38, 12  # Координаты первого поселения (₩)
+    XBoss, YBoss = 7, 7  # Координаты босса (₲)
+    XExit, YExit = 31, 3  # Координаты выхода (ʘ)
 
 
 layerMapGUI_2 = [
