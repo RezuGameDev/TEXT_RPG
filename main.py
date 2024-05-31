@@ -3,6 +3,9 @@ import logging
 from datetime import datetime
 from typing import List
 import EVENT.debug as db
+from modAPI.core import Core
+import modAPI.mod_loader as ml
+import threading
 
 class Logger:
     def __init__(self, log_folder: str):
@@ -33,6 +36,7 @@ class Game:
 
         self.d = d
         self.events = event
+        self.core = Core(self.config, self.world_values, self.game_flags, self.resistances, self.equipment, self.player, self.ability, self.save_manager, self.logo, self.consolas)
 
         self.event = self.events.Event(
                                         self.player,
@@ -50,6 +54,14 @@ class Game:
     def start(self):
         self.load_modules()
         self.show_main_menu()
+
+    def load_mods(self):
+        loader = ml.ModLoader(core=self.core)
+        loader.load_mods()
+        loader.run_mods()
+
+        mod_update_thread = threading.Thread(target=self.core.update_mods, daemon=True)
+        mod_update_thread.start()
 
     def load_modules(self):
         self.consolas.clear()
@@ -70,6 +82,7 @@ class Game:
 
         if self.config.anim:
             self.consolas.loading_animation(imports_list)
+        self.load_mods()
 
     def show_main_menu(self):
         if self.config.anim:
