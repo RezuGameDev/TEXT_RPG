@@ -21,7 +21,7 @@ hdl = ctypes.windll.kernel32.GetStdHandle(-11)
 class Config:
     seting, delayOutput = False, 0.1
     language = "EN" 
-    anim = False #!!!!!
+    anim = True
 
 class WorldValues:
     def __init__(self):

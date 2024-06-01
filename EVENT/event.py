@@ -333,7 +333,7 @@ class Event(BaseEvent):
             if move == 'q':
                 self.player.Px = player.x
                 self.player.Py = player.y
-                self.save_manager.saveFile()
+                self.save_manager.save_file()
                 self.game_flags.trips = False
                 break
 

@@ -7,4 +7,8 @@ class TestMod(BaseMod):
         self.mod_description = "A test mod for demonstration purposes"
         self.author = "Mod Author"
         self.version = "1.0"
-        
+    def run(self):
+        pass
+
+    def update(self):
+        pass
