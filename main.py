@@ -83,6 +83,7 @@ class Game:
         if self.config.anim:
             self.consolas.loading_animation(imports_list)
         self.load_mods()
+        input()
 
     def show_main_menu(self):
         if self.config.anim:
@@ -203,6 +204,7 @@ class Game:
             "[0] Exit game",
         )
 
+
     def create_hero(self):
         self.game_flags.creating_hero = True
         self.d.t.newGame = True
@@ -261,11 +263,11 @@ class Game:
             elif class_choice == "e":
                 self.show_swordsman_info()
             elif class_choice == "1":
-                self.set_hero_class("MAGICIAN", 20, 160, 15, 0.89, 1, 1, 1, True, False, False, 160, 160, 2)
+                self.set_hero_class("MAGICIAN", 70, 160, 15, 0.89, 1, 1, 1, True, False, False, 160, 160, 2)
             elif class_choice == "2":
                 self.set_hero_class("THIEF", 120, 140, 10, 1, 1, 0.89, 0.89, False, True, True, 60, 60, 3)
             elif class_choice == "3":
-                self.set_hero_class("SWORDSMAN", 10, 190, 30, 1, 0.89, 1, 1, False, False, False, 20, 20, 1)
+                self.set_hero_class("SWORDSMAN", 50, 190, 30, 1, 0.89, 1, 1, False, False, False, 20, 20, 1)
 
     def show_magician_info(self):
         self.consolas.create_table(

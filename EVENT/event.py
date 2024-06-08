@@ -205,17 +205,7 @@ class Event(BaseEvent):
                     return False
                 elif action.isdigit() and 0 < int(action) <= len(random_items):
                     self.buy_item(shop_type, item_names, gold_prices, int(action) - 1, random_items)
-                else:
-                    self.consolas.create_table(
-                        "info",
-                        True,
-                        [0],
-                        {0: "center"},
-                        35,
-                        shop_type,
-                        "Invalid option. Please try again."
-                    )
-                    input("> ")
+
 
             return True
 
