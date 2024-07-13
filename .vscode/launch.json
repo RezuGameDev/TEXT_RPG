@@ -5,11 +5,11 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Отладчик Python: Текущий файл",
+            "name": ">_<",
             "type": "debugpy",
             "request": "launch",
-            "program": "${file}",
-            "console": "integratedTerminal"
+            "program": "main.py",
+            "console": "externalTerminal"
         }
     ]
 }

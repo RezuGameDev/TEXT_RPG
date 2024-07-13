@@ -1,3 +1,4 @@
+import logging
 import math
 import sys
 import os
@@ -10,6 +11,7 @@ import DATA.monster_data as md
 import DATA.data_persons as dp
 import DATA.item_data as itemd
 import EVENT.debug as db
+import DATA.data as d
 
 class Monster:
     def __init__(self):
@@ -28,7 +30,7 @@ class Monster:
         self.speed = md.forest[random_monster]["speed"]
 
 class BaseEvent:
-    def __init__(self, player, config, equipment, game_flags, world_values, ability, resistances, consolas, save_manager, d):
+    def __init__(self, player, config, equipment, game_flags, world_values, ability, resistances, consolas, save_manager, win, table_menu, item_meneger):
         self.player = player
         self.config = config
         self.equipment = equipment
@@ -38,53 +40,54 @@ class BaseEvent:
         self.resistances = resistances
         self.consolas = consolas
         self.save_manager = save_manager
-        self.d = d
+        self.win = win
+        self.table_menu = table_menu
+        self.item_meneger = item_meneger
 
 class Event(BaseEvent):
-    def __init__(self, player, config, equipment, game_flags, world_values, ability, resistances, consolas, save_manager, d):
-        super().__init__(player, config, equipment, game_flags, world_values, ability, resistances, consolas, save_manager, d)
+    def __init__(self, player, config, equipment, game_flags, world_values, ability, resistances, consolas, save_manager, win, table_menu, item_meneger):
+        super().__init__(player, config, equipment, game_flags, world_values, ability, resistances, consolas, save_manager, win, table_menu, item_meneger)
 
     class MonsterAtak(BaseEvent):
-        def __init__(self, player, config, equipment, game_flags, world_values, ability, resistances, consolas, save_manager, d):
-            super().__init__(player, config, equipment, game_flags, world_values, ability, resistances, consolas, save_manager, d)
+        def __init__(self, player, config, equipment, game_flags, world_values, ability, resistances, consolas, save_manager, win, table_menu, item_meneger):
+            super().__init__(player, config, equipment, game_flags, world_values, ability, resistances, consolas, save_manager, win, table_menu, item_meneger)
 
         def monster_encounter(self):
             self.game_flags.battle = True
             self.monster = Monster()
 
-            self.consolas.create_table("info", True, None, {0: "center"}, 40, f"On your way you met a {self.monster.name}")
-            input("> ")
-            self.d.da.stop_background_music()
-            self.d.da.play_battle_music()
+            self.consolas.create_table( f"you noticed a {self.monster.name} on your way", alignment={0: "center"}, table_width=40)
+            self.win.getch()
+            d.da.stop_background_music()
+            d.da.play_battle_music()
 
             while self.game_flags.battle:
                 self.consolas.create_table(
-                    "info",
-                    True,
-                    [0],
-                    {0: "center"},
-                    25,
                     f"{self.monster.name}",
                     f"HP : {self.monster.hp}",
-                    f"DAMAGE : {self.monster.damage}"
+                    f"DAMAGE : {self.monster.damage}",
+                    separator_positions=[0],
+                    alignment={0: "center"},
+                    table_width=25,
+                    y=1,
+                    x=1,
                 )
                 self.consolas.create_table(
-                    "info",
-                    False,
-                    [0, 2],
-                    {0: "center"},
-                    25,
                     f"{self.player.name}",
                     f"HP : {self.player.Hp}",
                     f"DAMAGE : {self.player.Dm}",
-                    f"1, attack {self.monster.name}",
-                    "2, run"
+                    use_clear=False,
+                    separator_positions=[0],
+                    alignment={0: "center"},
+                    table_width=25,
+                    alignmentTable="r",
+                    y=1,
                 )
-                action = input("> ")
+                action = self.table_menu.menu(title="battle", options=["attack", "run"], tips=False, clear=False)
 
-                if action == "1":
+                if action == "0":
                     self.attack_monster(self.monster)
-                elif action == "2":
+                elif action == "1":
                     self.run_from_monster(self.monster)
 
                 if self.monster.hp <= 0:
@@ -93,44 +96,56 @@ class Event(BaseEvent):
 
                 self.monster_attack(self.monster)
 
-            self.d.da.stop_battle_music()
-            self.d.da.play_background_music()
+            d.da.stop_battle_music()
+            d.da.play_background_music()
 
         def attack_monster(self, monster):
             damage_multiplier = 2 if self.player.heroClass == "THIEF" else 1
 
             if self.player.heroClass == "SWORDSMAN":
                 monster.hp -= math.ceil((self.player.Dm * damage_multiplier) * monster.p_resist)
+
             elif self.player.heroClass == "THIEF":
                 monster.hp -= math.ceil((self.player.Dm * damage_multiplier) * monster.p_resist)
+
             elif self.player.heroClass == "MAGICIAN":
                 monster.hp -= math.ceil((self.player.Dm * damage_multiplier) * monster.m_resist)
+
             elif self.player.heroClass == "NULL":
                 monster.hp -= 5 + self.player.Dm * damage_multiplier
 
             monster.hp = max(0, monster.hp)
-            self.consolas.create_table("info", True, None, {0: "center"}, 45, f"You hit the {monster.name}, it has {monster.hp} HP")
-            input("> ")
+            self.consolas.create_table(f"You hit the {monster.name}, it has {monster.hp} HP", alignment={0: "center"}, table_width=45)
+            self.win.getch()
 
         def run_from_monster(self, monster):
             if random.random() > monster.aggression or self.player.speed > monster.speed:
-                self.consolas.create_table("info", True, [0], {0: "center"}, 25, "You run away", "Gold : 0", "XP : 0")
+                self.consolas.create_table("You run away", "Gold : 0", "XP : 0", separator_positions=[0], alignment={0: "center"}, table_width=25)
                 self.game_flags.battle = False
-                input("")
+                self.win.getch()
             else:
-                self.consolas.create_table("info", True, None, {0: "center"}, 25, "You couldn't escape")
-                input("> ")
+                self.consolas.create_table( "the monster caught up with you", alignment={0: "center"}, table_width=25,)
+                self.win.getch()
 
         def victory(self, monster):
             if self.ability.EarningCoinsAndXP:
                 monster.xp *= 2
                 monster.coin *= 2
+
             self.player.Xp += monster.xp
             self.player.gold += monster.coin
-            self.consolas.create_table("info", True, [0], {0: "center"}, 25, "VICTORY", f"Gold : {monster.coin}", f"XP : {self.player.Xp}/{self.player.XpToLv}")
-            if self.player.Xp >= self.player.XpToLv:
+            self.consolas.create_table(
+                "VICTORY",
+                f"Gold : {monster.coin}",
+                f"XP : {self.player.Xp}/{self.player.XpToLv}",
+                separator_positions=[0],
+                alignment={0: "center"},
+                table_width=25
+            )
+
+            while self.player.Xp >= self.player.XpToLv:
                 self.level_up()
-            input("> ")
+            self.win.getch()
             self.game_flags.battle = False
 
         def level_up(self):
@@ -141,117 +156,152 @@ class Event(BaseEvent):
                 self.player.maxHp = math.ceil(self.player.maxHp * 1.5)
                 self.player.Hp = self.player.maxHp
                 self.player.improvementStar += 1
-                self.player.Dm += 5
+                self.player.Dm = math.ceil(self.player.Dm * 1.5)
+
                 self.consolas.create_table(
-                    "info",
-                    False,
-                    [0],
-                    {0: "center"},
-                    25,
                     "NEW LEVEL",
                     f"HP : {self.player.maxHp}",
                     f"XP : {self.player.Xp}/{self.player.XpToLv}",
                     f"Damage : {self.player.Dm}",
-                    f"Improvement star : {self.player.improvementStar}"
+                    f"Improvement star : {self.player.improvementStar}",
+                    use_clear=False,
+                    separator_positions=[0],
+                    alignment={0: "center"},
+                    table_width=25,
                 )
 
         def monster_attack(self, monster):
             if monster.p_damage:
                 self.player.Hp -= math.ceil(((monster.damage * (1 - self.resistances.PhysicalResistInt)) * (1 - self.resistances.MagicPhysicalResistInt)) * (1 - (self.resistances.helmetResistInt + self.resistances.chestplateResistInt + self.resistances.shieldResistInt)))
+
             elif monster.m_damage:
                 self.player.Hp -= math.ceil(((monster.damage * (1 - self.resistances.MagicResistInt)) * (1 - self.resistances.MagicPhysicalResistInt)) * (1 - (self.resistances.helmetResistInt + self.resistances.chestplateResistInt + self.resistances.shieldResistInt)))
+
             if self.player.Hp <= 0:
                 self.game_flags.game_over = True
+                self.game_flags.battle = False
+                
 
     class Shop(BaseEvent):
-        def __init__(self, player, config, equipment, game_flags, world_values, ability, resistances, consolas, save_manager, d):
-            super().__init__(player, config, equipment, game_flags, world_values, ability, resistances, consolas, save_manager, d)
+        def __init__(self, player, config, equipment, game_flags, world_values, ability, resistances, consolas, save_manager, win, table_menu, item_meneger):
+            super().__init__(player, config, equipment, game_flags, world_values, ability, resistances, consolas, save_manager, win, table_menu, item_meneger)
 
         def visit_shop(self, shop_type, phrases, items):
+            self.options = ["exit"]
+            self.additional_info = [""]
             random_items = random.sample(items, 3)
-            item_names = [item['name'] for item in random_items]
-            gold_prices = [random.randint(item["minGold"], item["maxGold"]) for item in random_items]
+            item_names = [item.name for item in random_items]
+            item_info = [item.info for item in random_items]
+            gold_prices = [random.randint(item.minGold, item.maxGold) for item in random_items]
 
-            self.consolas.create_table("info", True, [0], {0: "center"}, 35, shop_type, phrases)
+            self.options.extend([f"{item_names[i]}" for i in range(3)])
+            self.additional_info.extend([f"{gold_prices[i]} gold \n {item_info[i]}" for i in range(3)])
+
             self.game_flags.shop = True
-            input("> ")
 
             while self.game_flags.shop:
                 self.consolas.create_table(
-                    "info",
-                    True,
-                    [0, 3],
-                    {0: "center"},
-                    35,
-                    shop_type,
-                    *[f"{i + 1}, {item_names[i]} | {gold_prices[i]} gold" for i in range(3)],
-                    f"GOLD : {self.player.gold}",
-                    "[0] exit"
+                        self.player.name,
+                        f"class = {self.player.heroClass}",
+                        f"gold = {self.player.gold}",
+                        f"dm = {self.player.Dm}",
+                        f"hp = {self.player.Hp}/{self.player.maxHp}",
+                        f"hp = {self.player.mana}/{self.player.maxMana}",
+                        f"lv = {self.player.Lv}",
+                        f"xp = {self.player.Xp}/{self.player.XpToLv}",
+                        f"layer = {self.player.layer}",
+                        separator_positions=[0],
+                        alignment={0: "center"},
+                        alignmentTable="r",
+                        y=1,
                 )
-                action = input("> ")
+
+                self.consolas.create_table(
+                    f"helmet : {self.player.helmet}",
+                    f"chestplate : {self.player.chestplate}",
+                    f"right hand : {self.player.weapon}",
+                    f"left hand : {self.player.weapon2}",
+                    use_clear=False, 
+                    alignmentTable="r",
+                    y=14,
+                )
+
+                action = self.table_menu.menu(
+                    title=shop_type, 
+                    options=self.options,
+                    additional_info=self.additional_info,
+                    clear=False,
+                    y=20,
+                )
 
                 if action == "0":
                     exit_phrases = dp.blacksmith_purchase_exit if shop_type == "blacksmith" else dp.alchemist_purchase_exit
                     self.consolas.create_table(
-                        "info",
-                        True,
-                        [0],
-                        {0: "center"},
-                        35,
                         shop_type,
-                        random.choice(exit_phrases)
+                        random.choice(exit_phrases),
+                        separator_positions=[0],
+                        alignment={0: "center"},
+                        table_width=35,
                     )
-                    input("> ")
+                    self.win.getch()
                     return False
                 elif action.isdigit() and 0 < int(action) <= len(random_items):
                     self.buy_item(shop_type, item_names, gold_prices, int(action) - 1, random_items)
 
-
             return True
 
         def buy_item(self, shop_type, item_names, gold_prices, item_index, random_items):
-            if item_names[item_index] == "--------":
+            if self.options[item_index+1] == "--------":
                 no_product_phrases = dp.blacksmith_phrases_no_product if shop_type == "blacksmith" else dp.alchemist_phrases_no_product
-                self.consolas.create_table("info", True, [0], {0: "center"}, 35, shop_type, random.choice(no_product_phrases))
-                input("> ")
+                self.consolas.create_table(shop_type, random.choice(no_product_phrases), separator_positions=[0], alignment={0: "center"}, table_width=35,)
+                self.win.getch()
             else:
                 if self.player.gold >= gold_prices[item_index]:
+
                     self.player.gold -= gold_prices[item_index]
-                    self.player.item.append(random_items[item_index]['ID'])
+                    self.player.item.append(random_items[item_index].ID)
                     thank_phrases = dp.blacksmith_purchase_phrases if shop_type == "blacksmith" else dp.alchemist_purchase_phrases
-                    self.consolas.create_table("info", True, [0, 3], {0: "center"}, 35, shop_type, random.choice(thank_phrases))
-                    input("> ")
-                    item_names[item_index] = "--------"
+                    self.consolas.create_table(shop_type, random.choice(thank_phrases), separator_positions=[0], alignment={0: "center"}, table_width=35)
+                    self.win.getch()
+
+                    self.options[item_index+1] = "--------"
+                    self.additional_info[item_index+1] = "purchased"
                 else:
                     no_gold_phrases = dp.blacksmith_purchase_no_gold if shop_type == "blacksmith" else dp.alchemist_purchase_no_gold
-                    self.consolas.create_table("info", True, [0], {0: "center"}, 35, shop_type, random.choice(no_gold_phrases))
-                    input("> ")
+                    self.consolas.create_table(shop_type, random.choice(no_gold_phrases), separator_positions=[0], alignment={0: "center"}, table_width=35)
+                    self.win.getch()
 
         def shop(self):
             self.shop_type = random.choice(self.world_values.shop_types)
             self.near_store = True
 
             while self.near_store:
-                self.consolas.create_table("info", True, [0], {0: "center"}, 40, f"This is a {self.shop_type} shop", "0, move on", "1, go inside")
-                action = input("> ")
+                self.consolas.create_table(f"This is a {self.shop_type} shop", alignment={0: "center"}, table_width=28)
+                action = self.table_menu.menu(
+                    title="shop", 
+                    options=["move on", "go inside"],
+                    tips=False,
+                    clear=False,
+                    y=25
+                )
 
                 if action == "0":
                     self.near_store = False
                     break
                 elif action == "1":
-                    self.d.da.stop_background_music()
-                    self.d.da.play_shop_music()
+                    d.da.stop_background_music()
+                    d.da.play_shop_music()
 
                     if self.shop_type == "blacksmith":
                         self.phrases = random.choice(dp.blacksmith_phrases)
-                        self.items = itemd.blacksmith_items
+                        self.items = self.item_meneger.blacksmith_items
                     elif self.shop_type == "alchemist":
                         self.phrases = random.choice(dp.alchemist_phrases)
-                        self.items = itemd.alchemical_items
+                        self.items = self.item_meneger.alchemical_items
 
                     self.near_store = self.visit_shop(self.shop_type, self.phrases, self.items)
-                    self.d.da.stop_shop_music()
-                    self.d.da.play_background_music()
+                    d.da.stop_shop_music()
+                    d.da.play_background_music()
                     break
 
 
@@ -269,7 +319,9 @@ class Event(BaseEvent):
                 self.resistances,
                 self.consolas,
                 self.save_manager,
-                self.d
+                self.win,
+                self.table_menu,
+                self.item_meneger
             )
             monstar.monster_encounter()
 
@@ -287,7 +339,9 @@ class Event(BaseEvent):
                 self.resistances,
                 self.consolas,
                 self.save_manager,
-                self.d
+                self.win,
+                self.table_menu,
+                self.item_meneger
             )
             shop.shop()
             # Изменяем шансы для следующего события
@@ -297,38 +351,40 @@ class Event(BaseEvent):
 
     def start_game(self, layer, player):
         map_layers = {
-            1: (self.d.ld.layerMapGUI_1, self.d.ld.layer1),
-            2: (self.d.ld.layerMapGUI_2, self.d.ld.layer2),
-            3: (self.d.ld.layerMapGUI_3, self.d.ld.layer3),
-            4: (self.d.ld.layerMapGUI_4, self.d.ld.layer4),
-            5: (self.d.ld.layerMapGUI_5, self.d.ld.layer5),
-            6: (self.d.ld.layerMapGUI_6, self.d.ld.layer6),
-            7: (self.d.ld.layerMapGUI_7, self.d.ld.layer7),
-            8: (self.d.ld.layerMapGUI_8, self.d.ld.layer8),
-            9: (self.d.ld.layerMapGUI_9, self.d.ld.layer9)
+            1: (d.ld.layerMapGUI_1, d.ld.layer1),
+            2: (d.ld.layerMapGUI_2, d.ld.layer2),
+            3: (d.ld.layerMapGUI_3, d.ld.layer3),
+            4: (d.ld.layerMapGUI_4, d.ld.layer4),
+            5: (d.ld.layerMapGUI_5, d.ld.layer5),
+            6: (d.ld.layerMapGUI_6, d.ld.layer6),
+            7: (d.ld.layerMapGUI_7, d.ld.layer7),
+            8: (d.ld.layerMapGUI_8, d.ld.layer8),
+            9: (d.ld.layerMapGUI_9, d.ld.layer9)
         }
 
-        map, layer_info = map_layers.get(layer, (self.d.ld.layerMapGUI_cheatcr, self.d.ld.layer1))
+        map, layer_info = map_layers.get(layer, (d.ld.layerMapGUI_cheatcr, d.ld.layer1))
 
         while self.game_flags.trips:
             if self.game_flags.game_over:
                 self.game_flags.trips = False
                 break
+            
+            self.consolas.display_map(map, player, y=5)
 
-            self.consolas.display_map(map, player)
+            self.consolas.create_table("(UP|LEFT|DOWN|RIGHET|)-movement", "Q-quit", "I-inventory", "M-monstronomicon", alignmentTable="l", use_clear=False, y=1, x=5)
+            move = self.win.getch()
 
-            self.consolas.create_table("info", False, [0], None, 22, "Where do you want to go? (W|A|S|D|)", "Q-quit", "I-inventory", "M-monstronomicon")
-            move = input("> ").lower()
+            logging.info(f"INFO: Key pressed: {move}", exc_info=False)
 
-            if move == 'q':
+            if move == 113:
                 self.player.Px = player.x
                 self.player.Py = player.y
                 self.save_manager.save_file()
                 self.game_flags.trips = False
                 break
 
-            elif move in {'w', 's', 'a', 'd'}:
-                dx, dy = {'w': (0, -1), 's': (0, 1), 'a': (-1, 0), 'd': (1, 0)}[move]
+            elif move in {d.curses.KEY_UP, d.curses.KEY_DOWN, d.curses.KEY_LEFT, d.curses.KEY_RIGHT}:
+                dx, dy = {d.curses.KEY_UP: (0, -1), d.curses.KEY_DOWN: (0, 1), d.curses.KEY_LEFT: (-1, 0), d.curses.KEY_RIGHT: (1, 0)}[move]
                 new_x, new_y = player.x + dx, player.y + dy
 
                 if 0 <= new_x < len(map[0]) and 0 <= new_y < len(map):
@@ -340,47 +396,41 @@ class Event(BaseEvent):
                 else:
                     self.consolas.create_table("erorre", True, None, None, 22, "Beyond the bounds of the gaming world")
 
-            elif move == 'i':
+            elif move == 105:
                 self.openInventory()
 
-            elif move == 'm':
+            elif move == 109:
                 if self.player.playerMonstronomicon:
                     pass
                 else:
                     # Доделать
-                    self.consolas.create_table("info", True, None, None, 22, "")
+                    self.consolas.create_table("")
 
 
     def openInventory(self):
-        self.consolas.clear()
+        self.win.clear()
         self.game_flags.inventory = True
         item_ids = self.player.item
 
         while self.game_flags.inventory:
 
-            matching_classes_names = []
+            matching_classes_names = ["exit"]
             matching_classes = {}
 
             item_index = 1
 
             # Перебираем все ID предметов
             for item_id in item_ids:
-                for class_item in itemd.all_item:
-                    if item_id == class_item["ID"]:
+                for class_item in self.item_meneger.all_items:
+                    if item_id == class_item.ID:
                         matching_classes[item_index] = class_item
 
-                        matching_classes_names.append(f"{class_item['name']} | {item_index}")
+                        matching_classes_names.append(f"{class_item.name}")
 
                         item_index += 1
                         break
 
-            self.consolas.create_table("info", True, [0], {0 : "center"}, 45, "inventory", *matching_classes_names )
             self.consolas.create_table(
-                "info",
-                False, 
-                [0],
-                None,
-                45,
                 f"name : {self.player.name}",
                 f"class : {self.player.heroClass}",
                 f"HP : {self.player.Hp} / {self.player.maxHp}",
@@ -390,100 +440,40 @@ class Event(BaseEvent):
                 f"Mana : {self.player.mana} / {self.player.maxMana}",
                 f"IS : {self.player.improvementStar}",
                 f"layer : {self.player.layer} / 9",
+                separator_positions=[0],
+                alignment={0: "center"},
+                alignmentTable="r",
+                y=1,
             )
             self.consolas.create_table(
-                "info",
-                False, 
-                None,
-                None,
-                45,
                 f"helmet : {self.player.helmet}",
                 f"chestplate : {self.player.chestplate}",
                 f"right hand : {self.player.weapon}",
                 f"left hand : {self.player.weapon2}",
+                use_clear=False, 
+                alignmentTable="r",
+                y=14,
             )
-            self.consolas.create_table("info", False, None, None, 15, "0, - exit")
 
-            choice = input("> ")
-            
+            choice = self.table_menu.menu("inventory", matching_classes_names, tips=False, y=1, clear=False)
+                        
             if choice.isdigit() and int(choice) in matching_classes:
                 chosen_item = matching_classes[int(choice)]
                 
                 while (True):
-                    self.consolas.create_table("info", True, None, {0 : "center"}, 35, "[1] INFO | [2] USE | [3] BACK" )
-                    choice = input("> ")
+                    choice = self.table_menu.menu("inventory", ["INFO","USE","BACK"], tips=False, y=1)
+                    if choice == "0":
+                        self.consolas.create_table(chosen_item.info , alignment={0 : "center"}, table_width=22)
+                        self.win.getch()
+
                     if choice == "1":
-                        self.consolas.create_table("info", True, None, {0 : "center"}, 22, chosen_item["info"] )
-                        input()
+                        if chosen_item.item_type in {1, 2, 3, 4, 5, 6 ,7}:
+                            self.item_meneger.use_item(chosen_item.ID)
 
-                    if choice == "2":
-
-                        if chosen_item["type"] == 1:
-                            itemd.use_potions(chosen_item["ID"])
-                        
-                        elif chosen_item["type"] == 2:
-                            self.resistances.helmetResistInt = chosen_item["Physical_Resist"]
-                            self.player.helmet = chosen_item["name"]
-                            self.equipment.helmetID =chosen_item["ID"]
-                            self.player.item.remove(chosen_item["ID"])
-
-                        elif chosen_item["type"] == 3:
-                            self.resistances.chestplateResistInt = chosen_item["Physical_Resist"]
-                            self.player.chestplate = chosen_item["name"]
-                            self.equipment.chestplateID =chosen_item["ID"]
-                            self.player.item.remove(chosen_item["ID"])
-
-                        elif chosen_item["type"] == 4:
-                            if self.player.heroClass == "SWORDSMAN":
-                                self.player.Dm += chosen_item["damage"]
-                                self.player.weapon = chosen_item["name"]
-                                self.equipment.weaponID =chosen_item["ID"]
-                                self.player.item.remove(chosen_item["ID"])
-                            else:
-                                self.consolas.create_table("info", True, None, {0 : "center"}, 35, "this weapon is not suitable for you" )
-
-                        elif chosen_item["type"] == 5:
-                            if  self.player.heroClass == "THIEF":
-                                while True:
-                                    self.consolas.create_table("info", True, None, {0 : "center", 1 : "center"}, 35, "Which hand should I take the dagger in?", "[1] left | [2] right")
-                                    choice = input("> ")
-                                    if choice == "1":
-                                        self.player.Dm += chosen_item["damage"]
-                                        self.player.weapon = chosen_item["name"]
-                                        self.equipment.weaponID =chosen_item["ID"]
-                                        self.player.item.remove(chosen_item["ID"])
-                                    elif choice == "2":
-                                        self.player.Dm += chosen_item["damage"]
-                                        self.player.weapon2 = chosen_item["name"]
-                                        self.equipment.weapon2ID =chosen_item["ID"]
-                                        self.player.item.remove(chosen_item["ID"])
-                            else:
-                                self.consolas.create_table("info", True, None, {0 : "center"}, 35, "this weapon is not suitable for you" )
-
-                        elif chosen_item["type"] == 6:
-                            if self.player.heroClass == "MAGICIAN":
-                                self.player.Dm += chosen_item["damage"]
-                                self.player.weapon = chosen_item["name"]
-                                self.equipment.weaponID = chosen_item["ID"]
-                                self.playerd.maxMana += chosen_item["mana"]
-                                self.playerd.item.remove(chosen_item["ID"])
-                            else:
-                                self.consolas.create_table("info", True, None, {0 : "center"}, 35, "this weapon is not suitable for you" )
-                        
-                        elif chosen_item["type"] == 7:
-                            if self.player.heroClass == "SWORDSMAN":
-                                self.resistances.shieldResistInt = chosen_item["Physical_Resist"]
-                                self.player.weapon2 = chosen_item["name"]
-                                self.equipment.weapon2ID =chosen_item["ID"]
-                                self.player.item.remove(chosen_item["ID"])
-                            else:
-                                self.consolas.create_table("info", True, None, {0 : "center"}, 35, "this weapon is not suitable for you" )
-
-
-                        input("> ")
+                        self.win.getch()
                         break
                     
-                    if choice == "3":
+                    if choice == "2":
                         break
             elif choice == "0":
                 break
@@ -503,5 +493,5 @@ if __name__ == "__main__":
 
     player.gold = 999
 
-    a = Event(player, config, equipment, game_flags, world_values, ability, resistances, consolas, save_manager, d)
+    a = Event(player, config, equipment, game_flags, world_values, ability, resistances, consolas, save_manager)
     a.start_game()

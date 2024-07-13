@@ -2,7 +2,7 @@
 import time
 
 class Core:
-    def __init__(self, Config, WorldValues, GameFlags, Resistances, Equipment, Player, Ability, SaveManager, Logo, Consolas):
+    def __init__(self, Config, WorldValues, GameFlags, Resistances, Equipment, Player, Ability, SaveManager, Logo, Consolas, TableMenu):
         self.Config = Config
         self.WorldValues = WorldValues
         self.GameFlags = GameFlags
@@ -13,6 +13,8 @@ class Core:
         self.SaveManager = SaveManager
         self.Logo = Logo
         self.Consolas = Consolas
+        self.TableMenu = TableMenu
+
         self.mod_update_interval = 0.5  # Интервал обновления модов в секундах
         self.mods = []
 

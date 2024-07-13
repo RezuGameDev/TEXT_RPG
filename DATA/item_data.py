@@ -2,388 +2,197 @@
 #   ID : 1
 #   названия : "названия",
 #   редкость : "Common"\"Uncommon"\"Rare"\"Epic"\"Legendary",
-#   тип : 1 - зелье \ 2 - шлем \ 3 - нагрудник \ 4 - меч \ 5 - кинжал \ 6 - посох \ 7 - щит,
+#   тип : 1 - зелье \ 2 - шлем \ 3 - нагрудник \ 4 - меч \ 5 - кинжал \ 6 - посох \ 7 - щит, 
 #       type: 1 - potion \ 2 - helmet \ 3 - breastplate \ 4 - sword \ 5 - dagger \ 6 - staff \ 7 - shield,
 #   защита\урон : "защита\урон",
 #   указание какая защита\урон (физичиская\мфгичиская),
 #   другие показатели по надобности
 #}
+class ItemManager:
+    class Item:
+        def __init__(self, manager, ID, name, rarity, item_type, minGold, maxGold, info):
+            self.manager = manager
+            self.ID = ID
+            self.name = name
+            self.rarity = rarity
+            self.item_type = item_type
+            self.minGold = minGold
+            self.maxGold = maxGold
+            self.info = info
 
-import DATA.data as d
+    class Potion(Item):
+        def __init__(self, manager, ID, name, rarity, item_type, minGold, maxGold, info, hp_increase=0, mana_increase=0):
+            super().__init__(manager, ID, name, rarity, item_type, minGold, maxGold, info)
+            self.hp_increase = hp_increase
+            self.mana_increase = mana_increase
 
-# Health Potion 1-5
-Health_Potion_1 = {
-    "ID" : 0,
-    "name" : "Health Potion I",
-    "rarity" : "Common",
-    "type" : 1,
-    "minGold" : 5,
-    "maxGold" : 14,
-    "info" : "Hp + 10"
-}
+        def use(self):
+            if self.hp_increase:
+                self.manager.player.Hp += self.hp_increase
+                if self.manager.player.Hp > self.manager.player.maxHp:
+                    self.manager.player.Hp = self.manager.player.maxHp
+                self.manager.consolas.create_table(f"HP: {self.manager.player.Hp} / {self.manager.player.maxHp}", alignment={0: "center"}, table_width=22)
+            if self.mana_increase:
+                self.manager.player.mana += self.mana_increase
+                if self.manager.player.mana > self.manager.player.maxMana:
+                    self.manager.player.mana = self.manager.player.maxMana
+                self.manager.consolas.create_table(f"Mana: {self.manager.player.mana} / {self.manager.player.maxMana}", alignment={0: "center"}, table_width=22)
+            self.manager.player.item.remove(self.ID)
 
-def HealthPotion_1():
-    d.Hp += 10
+    class StrengthTonic(Item):
+        def __init__(self, manager, ID, name, rarity, item_type, minGold, maxGold, info, damage_increase):
+            super().__init__(manager, ID, name, rarity, item_type, minGold, maxGold, info)
+            self.damage_increase = damage_increase
 
-    if d.Hp > d.maxHp:
-        d.Hp = d.maxHp
-    
-    d.item.remove(Health_Potion_1["ID"])
-    d.create_table("info", True, None, {0 : "center"}, 22, f"HP : {d.Hp} / {d.maxHp}")
+        def use(self):
+            self.manager.player.Effects.append(self.ID)
+            self.manager.player.item.remove(self.ID)
 
+    class Equipment(Item):
+        def __init__(self, manager, ID, name, rarity, item_type, minGold, maxGold, info, damage=0, mana=0, physical_resist=0):
+            super().__init__(manager, ID, name, rarity, item_type, minGold, maxGold, info)
+            self.damage = damage
+            self.mana = mana
+            self.physical_resist = physical_resist
 
-Health_Potion_2 = {
-    "ID" : 1,
-    "name" : "Health Potion II",
-    "rarity" : "Uncommon",
-    "type" : 1,
-    "minGold": 15,
-    "maxGold": 24,
-    "info" : "Hp + 15"
-}
+        def equip(self):
+            if self.item_type == 2:
+                self.manager.resistances.helmetResistInt = self.physical_resist
+                self.manager.player.helmet = self.name
+                self.manager.equipment.helmetID = self.ID
+                self.manager.player.item.remove(self.ID)
 
-def HealthPotion_2():
-    d.Hp += 15
+            elif self.item_type == 3:
+                self.manager.resistances.chestplateResistInt = self.physical_resist
+                self.manager.player.chestplate = self.name
+                self.manager.equipment.chestplateID = self.ID
+                self.manager.player.item.remove(self.ID)
 
-    if d.Hp > d.maxHp:
-        d.Hp = d.maxHp
-    
-    d.item.remove(Health_Potion_2["ID"])
-    d.create_table("info", True, None, {0 : "center"}, 22, f"HP : {d.Hp} / {d.maxHp}")
+            elif self.item_type == 4:
+                if self.manager.player.heroClass == "SWORDSMAN":
+                    self.manager.player.Dm += self.damage
+                    self.manager.player.weapon = self.name
+                    self.manager.equipment.weaponID = self.ID
+                    self.manager.player.item.remove(self.ID)
+                else:
+                    self.manager.consolas.create_table("this weapon is not suitable for you", alignment={0: "center"}, table_width=35)
 
+            elif self.item_type == 5:
+                if self.manager.player.heroClass == "THIEF":
+                    while True:
+                        choice = self.manager.table_menu.menu("inventory", ["left hand", "right hand"], tips=False, y=1)
+                        if choice == "0":
+                            self.manager.player.Dm += self.damage
+                            self.manager.player.weapon = self.name
+                            self.manager.equipment.weaponID = self.ID
+                            self.manager.player.item.remove(self.ID)
+                        elif choice == "1":
+                            self.manager.player.Dm += self.damage
+                            self.manager.player.weapon2 = self.name
+                            self.manager.equipment.weapon2ID = self.ID
+                            self.manager.player.item.remove(self.ID)
+                else:
+                    self.manager.consolas.create_table("this weapon is not suitable for you", alignment={0: "center"}, table_width=35)
 
-Health_Potion_3 = {
-    "ID" : 2,
-    "name" : "Health Potion III",
-    "rarity" : "Rare",
-    "type" : 1,
-    "minGold": 25,
-    "maxGold": 34,
-    "info" : "Hp + 20"
-}
+            elif self.item_type == 6:
+                if self.manager.player.heroClass == "MAGICIAN":
+                    self.manager.player.Dm += self.damage
+                    self.manager.player.weapon = self.name
+                    self.manager.equipment.weaponID = self.ID
+                    self.manager.player.maxMana += self.mana
+                    self.manager.player.item.remove(self.ID)
+                else:
+                    self.manager.consolas.create_table("this weapon is not suitable for you", alignment={0: "center"}, table_width=35)
 
-def HealthPotion_3():
-    d.Hp += 20
+            elif self.item_type == 7:
+                if self.manager.player.heroClass == "SWORDSMAN":
+                    self.manager.resistances.shieldResistInt = self.physical_resist
+                    self.manager.player.weapon2 = self.name
+                    self.manager.equipment.weapon2ID = self.ID
+                    self.manager.player.item.remove(self.ID)
+                else:
+                    self.manager.consolas.create_table("this weapon is not suitable for you", alignment={0: "center"}, table_width=35)
 
-    if d.Hp > d.maxHp:
-        d.Hp = d.maxHp
-    
-    d.item.remove(Health_Potion_3["ID"])
-    d.create_table("info", True, None, {0 : "center"}, 22, f"HP : {d.Hp} / {d.maxHp}")
+    def __init__(self, player, equipment, resistances, consolas):
+        self.player = player
+        self.equipment = equipment
+        self.resistances = resistances
+        self.consolas = consolas
 
+        # Health Potions
+        self.health_potions = [
+            self.Potion(self, 0, "Health Potion I", "Common", 1, 5, 14, "Hp + 10", hp_increase=10),
+            self.Potion(self, 1, "Health Potion II", "Uncommon", 1, 15, 24, "Hp + 15", hp_increase=15),
+            self.Potion(self, 2, "Health Potion III", "Rare", 1, 25, 34, "Hp + 20", hp_increase=20),
+            self.Potion(self, 3, "Health Potion IV", "Epic", 1, 35, 44, "Hp + 25", hp_increase=25),
+            self.Potion(self, 4, "Health Potion V", "Legendary", 1, 45, 54, "Hp + 35", hp_increase=35)
+        ]
 
-Health_Potion_4 = {
-    "ID" : 3,
-    "name" : "Health Potion IV",
-    "rarity" : "Epic",
-    "type" : 1,
-    "minGold": 35,
-    "maxGold": 44,
-    "info" : "Hp + 25"
-}
+        # Mana Elixirs
+        self.mana_elixirs = [
+            self.Potion(self, 5, "Mana Elixir I", "Common", 1, 5, 14, "Mana + 10", mana_increase=10),
+            self.Potion(self, 6, "Mana Elixir II", "Uncommon", 1, 15, 24, "Mana + 20", mana_increase=20),
+            self.Potion(self, 7, "Mana Elixir III", "Rare", 1, 25, 34, "Mana + 30", mana_increase=30),
+            self.Potion(self, 8, "Mana Elixir IV", "Epic", 1, 35, 44, "Mana + 40", mana_increase=40),
+            self.Potion(self, 9, "Mana Elixir V", "Legendary", 1, 45, 54, "Mana + 50", mana_increase=50)
+        ]
 
-def HealthPotion_4():
-    d.Hp += 25
+        # Strength Tonics
+        self.strength_tonics = [
+            self.StrengthTonic(self, 10, "Strength Tonic I", "Common", 1, 5, 14, "Damage + 5", damage_increase=5),
+            self.StrengthTonic(self, 11, "Strength Tonic II", "Uncommon", 1, 15, 24, "Damage + 10", damage_increase=10),
+            self.StrengthTonic(self, 12, "Strength Tonic III", "Rare", 1, 25, 34, "Damage + 15", damage_increase=15),
+            self.StrengthTonic(self, 13, "Strength Tonic IV", "Epic", 1, 35, 44, "Damage + 20", damage_increase=20),
+            self.StrengthTonic(self, 14, "Strength Tonic V", "Legendary", 1, 45, 54, "Damage + 25", damage_increase=25)
+        ]
 
-    if d.Hp > d.maxHp:
-        d.Hp = d.maxHp
-    
-    d.item.remove(Health_Potion_4["ID"])
-    d.create_table("info", True, None, {0 : "center"}, 22, f"HP : {d.Hp} / {d.maxHp}")
+        # Equipment Items (Weapons, Armor, etc.)
+        self.equipments = {
+            "swords": [
+                self.Equipment(self, 15, "Iron Sword", "Common", 4, 23, 34, "10 Damage \n only for the \"swordsman\" class", damage=10),
+            ],
 
+            "daggers": [
+                self.Equipment(self, 16, "Iron Dagger", "Common", 5, 15, 26, "5 Damage \n only for the \"thief\" class", damage=5),
+            ],
 
-Health_Potion_5 = {
-    "ID" : 4,
-    "name" : "Health Potion V",
-    "rarity" : "Legendary",
-    "type" : 1,
-    "minGold": 45,
-    "maxGold": 54,
-    "info" : "Hp + 35"
-}
+            "shields": [
+                self.Equipment(self, 17, "Iron Shield", "Common", 7, 25, 36, "Physical Resist: 2% \n only for the \"swordsman\" class", physical_resist=0.02),
+            ],
 
-def HealthPotion_5():
-    d.Hp += 35
+            "armors": [
+                self.Equipment(self, 18, "Iron Armor", "Common", 3, 28, 39, "Physical Resist: 5%", physical_resist=0.05),
+            ],
+            
+            "helmets": [
+                self.Equipment(self, 19, "Iron Helm", "Common", 2, 25, 36, "Physical Resist: 3%", physical_resist=0.03),
+            ],
 
-    if d.Hp > d.maxHp:
-        d.Hp = d.maxHp
-    
-    d.item.remove(Health_Potion_5["ID"])
-    d.create_table("info", True, None, {0 : "center"}, 22, f"HP : {d.Hp} / {d.maxHp}")
+            "staffs": [
+                self.Equipment(self, 20, "Wooden Staff", "Common", 6, 26, 37, "Damage + 1 \n Mana + 15 \n only for the \"magician\" class", damage=1, mana=15),
+            ],
+        }
 
+        # Collect all items from the equipment categories
+        self.all_equipment = []
+        for category in self.equipments.values():
+            self.all_equipment.extend(category)
 
-# Mana Elixir 1-5
-Mana_Elixir_1 = {
-    "ID": 5,
-    "name": "Mana Elixir I",
-    "rarity": "Common",
-    "type": 1,
-    "minGold": 5,
-    "maxGold": 14,
-    "info" : "Mana + 10"
-}
+        # All Potions and Tonics
+        self.alchemical_items = self.health_potions + self.mana_elixirs + self.strength_tonics
+        self.blacksmith_items = self.all_equipment
 
+        # All Items
+        self.all_items = self.alchemical_items + self.all_equipment
 
-def ManaElixir_1():
-    d.mana += 10
+        # ID to Item Mapping
+        self.item_use_functions = {item.ID: item.use for item in self.alchemical_items}
+        self.item_equip_functions = {item.ID: item.equip for item in self.all_equipment}
 
-    if d.mana > d.maxMana:
-        d.mana = d.maxMana
-    
-    d.item.remove(Mana_Elixir_1["ID"])
-    d.create_table("info", True, None, {0 : "center"}, 22, f"Mana : {d.mana} / {d.maxMana}")
-
-Mana_Elixir_2 = {
-    "ID": 6,
-    "name": "Mana Elixir II",
-    "rarity": "Uncommon",
-    "type": 1,
-    "minGold": 15,
-    "maxGold": 24,
-    "info" : "Mana + 20"
-}
-
-
-def ManaElixir_2():
-    d.mana += 20
-
-    if d.mana > d.maxMana:
-        d.mana = d.maxMana
-    
-    d.item.remove(Mana_Elixir_2["ID"])
-    d.create_table("info", True, None, {0 : "center"}, 22, f"Mana : {d.mana} / {d.maxMana}")
-
-Mana_Elixir_3 = {
-    "ID": 7,
-    "name": "Mana Elixir III",
-    "rarity": "Rare",
-    "type": 1,
-    "minGold": 25,
-    "maxGold": 34,
-    "info" : "Mana + 30"
-}
-
-def ManaElixir_3():
-    d.mana += 30
-
-    if d.mana > d.maxMana:
-        d.mana = d.maxMana
-    
-    d.item.remove(Mana_Elixir_3["ID"])
-    d.create_table("info", True, None, {0 : "center"}, 22, f"Mana : {d.mana} / {d.maxMana}")
-
-Mana_Elixir_4 = {
-    "ID": 8,
-    "name": "Mana Elixir IV",
-    "rarity": "Epic",
-    "type": 1,
-    "minGold": 35,
-    "maxGold": 44,
-    "info" : "Mana + 40"
-}
-
-def ManaElixir_4():
-    d.mana += 40
-
-    if d.mana > d.maxMana:
-        d.mana = d.maxMana
-    
-    d.item.remove(Mana_Elixir_4["ID"])
-    d.create_table("info", True, None, {0 : "center"}, 22, f"Mana : {d.mana} / {d.maxMana}")
-
-Mana_Elixir_5 = {
-    "ID": 9,
-    "name": "Mana Elixir V",
-    "rarity": "Legendary",
-    "type": 1,
-    "minGold": 45,
-    "maxGold": 54,
-    "info" : "Mana + 50"
-}
-
-def ManaElixir_5():
-    d.mana += 50
-
-    if d.mana > d.maxMana:
-        d.mana = d.maxMana
-    
-    d.item.remove(Mana_Elixir_5["ID"])
-    d.create_table("info", True, None, {0 : "center"}, 22, f"Mana : {d.mana} / {d.maxMana}")
-
-
-# Strength Tonic 1-5
-Strength_Tonic_1 = {
-    "ID": 10,
-    "name": "Strength Tonic I",
-    "rarity": "Common",
-    "type": 1,
-    "minGold": 5,
-    "maxGold": 14,
-    "info" : "Damage + 5"
-}
-
-def StrengthTonic_1():
-    d.Effects.append(Strength_Tonic_1["ID"])
-    
-    d.item.remove(Strength_Tonic_1["ID"])
-
-Strength_Tonic_2 = {
-    "ID": 11,
-    "name": "Strength Tonic II",
-    "rarity": "Uncommon",
-    "type": 1,
-    "minGold": 15,
-    "maxGold": 24,
-    "info" : "Damage + 10"
-}
-
-def StrengthTonic_2():
-    d.Effects.append(Strength_Tonic_2["ID"])
-    
-    d.item.remove(Strength_Tonic_2["ID"])
-
-Strength_Tonic_3 = {
-    "ID": 12,
-    "name": "Strength Tonic III",
-    "rarity": "Rare",
-    "type": 1,
-    "minGold": 25,
-    "maxGold": 34,
-    "info" : "Damage + 15"
-}
-
-def StrengthTonic_3():
-    d.Effects.append(Strength_Tonic_3["ID"])
-    
-    d.item.remove(Strength_Tonic_3["ID"])
-
-Strength_Tonic_4 = {
-    "ID": 13,
-    "name": "Strength Tonic IV",
-    "rarity": "Epic",
-    "type": 1,
-    "minGold": 35,
-    "maxGold": 44,
-    "info" : "Damage + 20"
-}
-
-def StrengthTonic_4():
-    d.Effects.append(Strength_Tonic_4["ID"])
-    
-    d.item.remove(Strength_Tonic_4["ID"])
-
-Strength_Tonic_5 = {
-    "ID": 14,
-    "name": "Strength Tonic V",
-    "rarity": "Legendary",
-    "type": 1,
-    "minGold": 45,
-    "maxGold": 54,
-    "info" : "Damage + 25"
-}
-
-def StrengthTonic_5():
-    d.Effects.append(Strength_Tonic_5["ID"])
-    
-    d.item.remove(Strength_Tonic_5["ID"])
-
-Iron_Sword = {
-    "ID": 15,
-    "name": "Iron Sword",
-    "rarity": "Common",
-    "damage" : 10,
-    "type": 4,
-    "minGold": 23,
-    "maxGold": 34,
-    "info" : "10 Damage"
-}
-Iron_Dagger = {
-    "ID": 16,
-    "name": "Iron Dagger",
-    "rarity": "Common",
-    "damage" : 5,
-    "type": 5,
-    "minGold": 15,
-    "maxGold": 26,
-    "info" : "5 Damage"
-}
-Iron_Shield = {
-    "ID": 17,
-    "name": "Iron Shield",
-    "rarity": "Common",
-    "Physical_Resist" : 0.02, # max 0.15
-    "type": 7,
-    "minGold": 25,
-    "maxGold": 36,
-    "info" : "Physical Resist: 2%"
-}
-Iron_Armor = {
-    "ID": 18,
-    "name": "Iron Armor",
-    "rarity": "Common",
-    "Physical_Resist" : 0.05, # max 0.4
-    "type": 3,
-    "minGold": 28,
-    "maxGold": 39,
-    "info" : "Physical Resist: 5%"
-}
-Iron_Helm = {
-    "ID": 19,
-    "name": "Iron Helm",
-    "rarity": "Common",
-    "Physical_Resist" : 0.03, # max 0.1
-    "type": 3,
-    "minGold": 25,
-    "maxGold": 36,
-    "info" : "Physical Resist: 3%"
-}
-Wooden_Staff = {
-    "ID": 19,
-    "name": "Wooden Staff",
-    "rarity": "Common",
-    "damage" : 1,
-    "mana" : 15,
-    "type": 6,
-    "minGold": 26,
-    "maxGold": 37,
-    "info" : "damage + 1 | mana + 15"
-}
-
-# All Pountions
-alchemical_items = [Health_Potion_1, Health_Potion_2, Health_Potion_3, Health_Potion_4, Health_Potion_5,
-                    Mana_Elixir_1, Mana_Elixir_2, Mana_Elixir_3, Mana_Elixir_4, Mana_Elixir_5,
-                    Strength_Tonic_1, Strength_Tonic_2, Strength_Tonic_3, Strength_Tonic_4, Strength_Tonic_5]
-
-# All Armor
-blacksmith_items = [Iron_Sword, Iron_Dagger, Iron_Shield, Iron_Armor, Iron_Helm]
-
-# All Iten
-all_item = [Health_Potion_1, Health_Potion_2, Health_Potion_3, Health_Potion_4, Health_Potion_5,
-            Mana_Elixir_1, Mana_Elixir_2, Mana_Elixir_3, Mana_Elixir_4, Mana_Elixir_5,
-            Strength_Tonic_1, Strength_Tonic_2, Strength_Tonic_3, Strength_Tonic_4, Strength_Tonic_5,
-            Iron_Sword, Iron_Dagger, Iron_Shield, Iron_Armor, Iron_Helm]
-
-#  ID  \ foncrionName
-potions_use_functions = {
-    0: HealthPotion_1,
-    1: HealthPotion_2,
-    2: HealthPotion_3,
-    3: HealthPotion_4,
-    4: HealthPotion_5,
-    5: ManaElixir_1,
-    6: ManaElixir_2,
-    7: ManaElixir_3,
-    8: ManaElixir_4,
-    9: ManaElixir_5,
-    10: StrengthTonic_1,
-    11: StrengthTonic_2,
-    12: StrengthTonic_3,
-    13: StrengthTonic_4,
-    14: StrengthTonic_5,
-}
-
-def use_potions(potions_id):
-    if potions_id in potions_use_functions:
-        potions_use_functions[potions_id]()
-    else:
-        print("This item cannot be used.")
+    def use_item(self, item_id):
+        if item_id in self.item_use_functions:
+            self.item_use_functions[item_id]()
+        elif item_id in self.item_equip_functions:
+            self.item_equip_functions[item_id]()
+        else:
+            print("This item cannot be used or equipped.")

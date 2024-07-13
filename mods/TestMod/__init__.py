@@ -5,7 +5,7 @@ class TestMod(BaseMod):
         super().__init__(core)
         self.mod_name = "Test Mod"
         self.mod_description = "A test mod for demonstration purposes"
-        self.author = "Mod Author"
+        self.author = "Fantomm"
         self.version = "1.0"
     def run(self):
         pass

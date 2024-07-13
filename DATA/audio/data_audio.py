@@ -16,11 +16,13 @@ def play_sound(sound):
 def play_sound_print():
     # Загрузка и воспроизведение звука
     print_sound = load_sound("print.wav")
+    print_sound.set_volume(0.5)
     play_sound(print_sound)
 
 def play_sound_print2():
     # Загрузка и воспроизведение звука
     print2_sound = load_sound("print2.wav")
+    print2_sound.set_volume(0.5)
     play_sound(print2_sound)
 
 def play_background_music():
