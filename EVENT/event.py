@@ -152,11 +152,11 @@ class Event(BaseEvent):
             while self.player.Xp >= self.player.XpToLv:
                 self.player.Lv += 1
                 self.player.Xp -= self.player.XpToLv
-                self.player.XpToLv = math.ceil(self.player.XpToLv * 1.5)
-                self.player.maxHp = math.ceil(self.player.maxHp * 1.5)
+                self.player.XpToLv = math.ceil(self.player.XpToLv * 1.8)
+                self.player.maxHp = math.ceil(self.player.maxHp * 1.1)
                 self.player.Hp = self.player.maxHp
                 self.player.improvementStar += 1
-                self.player.Dm = math.ceil(self.player.Dm * 1.5)
+                self.player.Dm = math.ceil(self.player.Dm * 1.1)
 
                 self.consolas.create_table(
                     "NEW LEVEL",
@@ -180,6 +180,7 @@ class Event(BaseEvent):
             if self.player.Hp <= 0:
                 self.game_flags.game_over = True
                 self.game_flags.battle = False
+                
                 
 
     class Shop(BaseEvent):
@@ -206,7 +207,7 @@ class Event(BaseEvent):
                         f"gold = {self.player.gold}",
                         f"dm = {self.player.Dm}",
                         f"hp = {self.player.Hp}/{self.player.maxHp}",
-                        f"hp = {self.player.mana}/{self.player.maxMana}",
+                        f"mana = {self.player.mana}/{self.player.maxMana}",
                         f"lv = {self.player.Lv}",
                         f"xp = {self.player.Xp}/{self.player.XpToLv}",
                         f"layer = {self.player.layer}",
@@ -232,6 +233,7 @@ class Event(BaseEvent):
                     additional_info=self.additional_info,
                     clear=False,
                     y=20,
+                    info_width=45
                 )
 
                 if action == "0":
@@ -306,7 +308,8 @@ class Event(BaseEvent):
 
 
     def randomEvent(self, monstr_max):
-        event = random.choices([1, 2], weights=self.world_values.chances, k=1)[0]
+        values = list(self.world_values.chances.values())
+        event = random.choices([1, 2, 3], weights=values, k=1)[0]
 
         if event == 1 and monstr_max > 0:
             monstar = self.MonsterAtak(
@@ -325,10 +328,11 @@ class Event(BaseEvent):
             )
             monstar.monster_encounter()
 
-            self.world_values.chances[0] = max(0, self.world_values.chances[0] - 5)  # Уменьшаем шансы для события 1 на 10
-            self.world_values.chances[1] = min(100, self.world_values.chances[1] + 10)  # Увеличиваем шансы для события 2 на 10
+            self.world_values.chances["monstr"] = max(0, self.world_values.chances["monstr"] - 5)  # Уменьшаем шансы для события 1 на 10
+            self.world_values.chances["shop"] = min(100, self.world_values.chances["shop"] + 5)
+            self.world_values.chances["void"] = min(100, self.world_values.chances["void"] + 5)  # Увеличиваем шансы для события 2 на 10
             monstr_max = monstr_max - 1
-        else:
+        elif event == 2:
             shop = self.Shop(
                 self.player,
                 self.config,
@@ -345,11 +349,23 @@ class Event(BaseEvent):
             )
             shop.shop()
             # Изменяем шансы для следующего события
-            self.world_values.chances[0] = min(100, self.world_values.chances[0] + 10)  # Увеличиваем шансы для события 1 на 10
-            self.world_values.chances[1] = max(0, self.world_values.chances[1] - 10)  # Уменьшаем шансы для события 2 на 10
+            self.world_values.chances["monstr"] = min(100, self.world_values.chances["monstr"] + 10)  # Увеличиваем шансы для события 1 на 10
+            self.world_values.chances["shop"] = max(0, self.world_values.chances["shop"] - 10)
+            self.world_values.chances["void"] = min(100, self.world_values.chances["void"] + 5)  # Уменьшаем шансы для события 2 на 10
+        elif event == 3:
+            self.world_values.chances["monstr"] = min(100, self.world_values.chances["monstr"] + 5)  # Увеличиваем шансы для события 1 на 10
+            self.world_values.chances["shop"] = max(0, self.world_values.chances["shop"] + 10)
+            self.world_values.chances["void"] = min(100, self.world_values.chances["void"] - 10)  # Уменьшаем шансы для события 2 на 10
+
+        if self.player.Hp <= 0:
+            self.game_flags.game_over = True
+            self.game_flags.battle = False
+            self.game_flags.play = False
+        
         return monstr_max
 
     def start_game(self, layer, player):
+        self.structure = None
         map_layers = {
             1: (d.ld.layerMapGUI_1, d.ld.layer1),
             2: (d.ld.layerMapGUI_2, d.ld.layer2),
@@ -362,16 +378,22 @@ class Event(BaseEvent):
             9: (d.ld.layerMapGUI_9, d.ld.layer9)
         }
 
-        map, layer_info = map_layers.get(layer, (d.ld.layerMapGUI_cheatcr, d.ld.layer1))
+        map, layer_info = map_layers.get(layer, (d.ld.layerMapGUI_cheatcr, d.ld.layerCheatcr))
 
-        while self.game_flags.trips:
+        while self.game_flags.trips: 
+
             if self.game_flags.game_over:
                 self.game_flags.trips = False
+                self.game_flags.play = False
                 break
             
             self.consolas.display_map(map, player, y=5)
 
-            self.consolas.create_table("(UP|LEFT|DOWN|RIGHET|)-movement", "Q-quit", "I-inventory", "M-monstronomicon", alignmentTable="l", use_clear=False, y=1, x=5)
+            self.consolas.create_table("(UP|LEFT|DOWN|RIGHT|)-movement", "Q-quit", "I-inventory", "M-monstronomicon", alignmentTable="l", use_clear=False, y=1, x=5, table_width=32)
+            self.consolas.create_table("ƒ-staircase", "₩-village", "ʘ-descent", "₲-Boss", alignmentTable="l", use_clear=False, y=8, x=5, table_width=32)
+            if self.structure in {0, 1, 2, 3}:
+                self.consolas.create_table("E-enter the building", alignmentTable="r", use_clear=False, y=1, table_width=32)
+
             move = self.win.getch()
 
             logging.info(f"INFO: Key pressed: {move}", exc_info=False)
@@ -382,6 +404,16 @@ class Event(BaseEvent):
                 self.save_manager.save_file()
                 self.game_flags.trips = False
                 break
+            
+            elif move == 101 and self.structure in {0, 1, 2, 3}:
+                if self.structure == 0:
+                    self.entrance_village(layer, player, player.x, player.y)
+                elif self.structure == 1:
+                    pass
+                elif self.structure == 2:
+                    pass
+                elif self.structure == 3:
+                    pass
 
             elif move in {d.curses.KEY_UP, d.curses.KEY_DOWN, d.curses.KEY_LEFT, d.curses.KEY_RIGHT}:
                 dx, dy = {d.curses.KEY_UP: (0, -1), d.curses.KEY_DOWN: (0, 1), d.curses.KEY_LEFT: (-1, 0), d.curses.KEY_RIGHT: (1, 0)}[move]
@@ -390,11 +422,22 @@ class Event(BaseEvent):
                 if 0 <= new_x < len(map[0]) and 0 <= new_y < len(map):
                     if map[new_y][new_x] != '*':
                         player.x, player.y = new_x, new_y
-                        layer_info.monsterMax = self.randomEvent(layer_info.monsterMax)
+                        if new_x in layer_info.XDungen and new_y in layer_info.YDungen:
+                            if new_x == layer_info.XSettlements and new_y == layer_info.YSettlements:
+                                self.structure = 0
+                            elif new_x == layer_info.XBoss and new_y == layer_info.YBoss:
+                                self.structure = 1
+                            elif new_x == layer_info.XExit and new_y == layer_info.YExit:
+                                self.structure = 2
+                            elif new_x == layer_info.XSpawn and new_y == layer_info.YSpawn:
+                                self.structure = 3
+                        else:
+                            self.structure = None
+                            layer_info.monsterMax = self.randomEvent(layer_info.monsterMax)
                     else:
-                        self.consolas.create_table("erorre", True, None, None, 22, "You cannot go there")
+                        self.consolas.create_table( "You cannot go there", style="erorre")
                 else:
-                    self.consolas.create_table("erorre", True, None, None, 22, "Beyond the bounds of the gaming world")
+                    self.consolas.create_table("Beyond the bounds of the gaming world", style="erorre", table_width=22)
 
             elif move == 105:
                 self.openInventory()
@@ -406,6 +449,137 @@ class Event(BaseEvent):
                     # Доделать
                     self.consolas.create_table("")
 
+    def entrance_village(self, layer, player, Sx, Sy):
+        self.shop = self.Shop(
+                self.player,
+                self.config,
+                self.equipment,
+                self.game_flags,
+                self.world_values,
+                self.ability,
+                self.resistances,
+                self.consolas,
+                self.save_manager,
+                self.win,
+                self.table_menu,
+                self.item_meneger
+        )
+        self.structure = None
+
+        map_layers = {
+            1: (d.ld.settlementMapGUI_1, d.ld.settlement1),
+            #2: (d.ld.layerMapGUI_2, d.ld.layer2),
+            #3: (d.ld.layerMapGUI_3, d.ld.layer3),
+            #4: (d.ld.layerMapGUI_4, d.ld.layer4),
+            #5: (d.ld.layerMapGUI_5, d.ld.layer5),
+            #6: (d.ld.layerMapGUI_6, d.ld.layer6),
+            #7: (d.ld.layerMapGUI_7, d.ld.layer7),
+            #8: (d.ld.layerMapGUI_8, d.ld.layer8),
+            #9: (d.ld.layerMapGUI_9, d.ld.layer9)
+        }
+
+        map, layer_info = map_layers.get(layer, (d.ld.layerMapGUI_cheatcr, d.ld.layerCheatcr))
+
+        self.AlchemistItems = self.item_meneger.alchemical_items
+        self.BlacksmithItems = self.item_meneger.blacksmith_items
+
+        player.x = layer_info.XSpawn
+        player.y = layer_info.YSpawn - 1
+
+        while self.game_flags.trips: 
+
+            if self.game_flags.game_over:
+                self.game_flags.trips = False
+                self.game_flags.play = False
+                break
+            
+            self.consolas.display_map(map, player, y=5)
+
+            self.consolas.create_table("(UP|LEFT|DOWN|RIGHT|)-movement", "Q-quit", "I-inventory", "M-monstronomicon", alignmentTable="l", use_clear=False, y=1, x=5, table_width=32)
+            self.consolas.create_table(
+                "ƒ-staircase",
+                "ʊ-blacksmith",
+                "å-alchemist",
+                "ĉ-rune magician",
+                "ʣ-adventurers guild",
+                "Æ-church",
+                "ɤ-empty building",
+                "ʚ-House",
+                "ɓ-field",
+                alignmentTable="l",
+                use_clear=False,
+                y=8,
+                x=5,
+                table_width=32
+            )
+            if self.structure in {0, 1, 2, 3, 4, 5}:
+                self.consolas.create_table("E-enter the building", alignmentTable="r", use_clear=False, y=1, table_width=32)
+
+            move = self.win.getch()
+
+            logging.info(f"INFO: Key pressed: {move}", exc_info=False)
+
+            if move == 113:
+                self.player.Px = Sx
+                self.player.Py = Sy
+                self.save_manager.save_file()
+                self.game_flags.trips = False
+                break
+            
+            elif move == 101 and self.structure in {0, 1, 2, 3}:
+                if self.structure == 0:
+                    player.x = Sx
+                    player.y = Sy
+                    break
+                elif self.structure == 1:
+                    self.phrases = random.choice(dp.alchemist_phrases)
+                    near_store = self.shop.visit_shop("alchemist", self.phrases, self.AlchemistItems)
+                elif self.structure == 2:
+                    self.phrases = random.choice(dp.blacksmith_phrases)
+                    near_store = self.shop.visit_shop("blacksmith", self.phrases, self.BlacksmithItems)
+                elif self.structure == 3:
+                    pass
+                elif self.structure == 4:
+                    pass
+                elif self.structure == 5:
+                    pass
+
+            elif move in {d.curses.KEY_UP, d.curses.KEY_DOWN, d.curses.KEY_LEFT, d.curses.KEY_RIGHT}:
+                dx, dy = {d.curses.KEY_UP: (0, -1), d.curses.KEY_DOWN: (0, 1), d.curses.KEY_LEFT: (-1, 0), d.curses.KEY_RIGHT: (1, 0)}[move]
+                new_x, new_y = player.x + dx, player.y + dy
+
+                if 0 <= new_x < len(map[0]) and 0 <= new_y < len(map):
+                    if map[new_y][new_x] != '*':
+                        player.x, player.y = new_x, new_y
+                        if new_x in layer_info.XDungen and new_y in layer_info.YDungen:
+                            if new_x == layer_info.XSpawn and new_y == layer_info.YSpawn:
+                                self.structure = 0
+                            elif new_x == layer_info.XAlchemist and new_y == layer_info.YAlchemist:
+                                self.structure = 1
+                            elif new_x == layer_info.XBlacksmith and new_y == layer_info.YBlacksmith:
+                                self.structure = 2
+                            elif new_x == layer_info.XRuneMage and new_y == layer_info.YRuneMage:
+                                self.structure = 3
+                            elif new_x == layer_info.XChurch and new_y == layer_info.YChurch:
+                                self.structure = 4
+                            elif new_x == layer_info.XAdventurersGuild and new_y == layer_info.YAdventurersGuild:
+                                self.structure = 5
+                        else:
+                            self.structure = None
+                    else:
+                        self.consolas.create_table( "You cannot go there", style="erorre")
+                else:
+                    self.consolas.create_table("Beyond the bounds of the gaming world", style="erorre", table_width=22)
+
+            elif move == 105:
+                self.openInventory()
+
+            elif move == 109:
+                if self.player.playerMonstronomicon:
+                    pass
+                else:
+                    # Доделать
+                    self.consolas.create_table("")
 
     def openInventory(self):
         self.win.clear()
@@ -434,6 +608,7 @@ class Event(BaseEvent):
                 f"name : {self.player.name}",
                 f"class : {self.player.heroClass}",
                 f"HP : {self.player.Hp} / {self.player.maxHp}",
+                f"Dm = {self.player.Dm}",
                 f"gold : {self.player.gold}",
                 f"XP : {self.player.Xp} / {self.player.XpToLv}",
                 f"Lv : {self.player.Lv}",
@@ -452,7 +627,7 @@ class Event(BaseEvent):
                 f"left hand : {self.player.weapon2}",
                 use_clear=False, 
                 alignmentTable="r",
-                y=14,
+                y=15,
             )
 
             choice = self.table_menu.menu("inventory", matching_classes_names, tips=False, y=1, clear=False)

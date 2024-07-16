@@ -22,7 +22,7 @@ class Logger:
         logging.basicConfig(filename=log_path, level=logging.DEBUG)
 
 class Game:
-    def __init__(self, config ,player, equipment, game_flags, logo, resistances, ability, save_manager, world_values, stdscr, console_settings):
+    def __init__(self, config ,player, equipment, game_flags, logo, resistances, ability, save_manager, world_values, stdscr, console_settings, tregers):
         self.config = config
         self.player = player
         self.equipment = equipment
@@ -34,6 +34,7 @@ class Game:
         self.world_values = world_values
         self.console_settings = console_settings
         self.stdscr = stdscr
+        self.tregers = tregers
 
         self.item_manager = None
         self.table_menu = None
@@ -69,7 +70,7 @@ class Game:
         self.table_menu = d.TableMenu(self.config, self.win)
         self.consolas = d.Consolas(self.config, player, self.win)
         self.item_manager = d.itemd.ItemManager(self.player, self.equipment, self.resistances, self.consolas)
-        self.core = Core(self.config, self.world_values, self.game_flags, self.resistances, self.equipment, self.player, self.ability, self.save_manager, self.logo, self.consolas, self.table_menu)
+        self.core = Core(self.config, self.world_values, self.game_flags, self.resistances, self.equipment, self.player, self.ability, self.save_manager, self.logo, self.consolas, self.table_menu, self.tregers)
         self.event = event.Event(self.player, self.config, self.equipment, self.game_flags, self.world_values, self.ability, self.resistances, self.consolas, self.save_manager, self.win, self.table_menu, self.item_manager)
 
 
@@ -94,14 +95,14 @@ class Game:
             self.consolas.play_animation(self.logo.company_logo, 0.3, y=5)
 
         while self.game_flags.run:
-            d.t.startGame = True
+            self.tregers.startGame = True
             d.da.play_background_music()
-            d.t.startGame = False
+            self.tregers.startGame = False
 
             while self.game_flags.meny:
-                d.t.mainMeny = True
+                self.tregers.mainMeny = True
                 self.win.clear()
-                d.t.mainMeny = False
+                self.tregers.mainMeny = False
 
                 self.show_sub_menus()
 
@@ -115,9 +116,9 @@ class Game:
 
     def show_sub_menus(self):
         while self.game_flags.autors:
-            d.t.autorsMeny = True
+            self.tregers.autorsMeny = True
             self.create_authors_table()
-            d.t.autorsMeny = False
+            self.tregers.autorsMeny = False
 
             self.game_flags.skip_enter = True
             self.game_flags.autors = False
@@ -180,9 +181,9 @@ class Game:
 
     def create_hero(self):
         self.game_flags.creating_hero = True
-        d.t.newGame = True
+        self.tregers.newGame = True
         d.time.sleep(0.1)
-        d.t.newGame = False
+        self.tregers.newGame = False
 
         while self.game_flags.creating_hero:
             self.consolas.create_table(
@@ -223,11 +224,11 @@ class Game:
             class_choice = self.table_menu.menu(title="classes" ,options=["MAGICIAN","THIEF","SWORDSMAN"] ,additional_info=class_info)
 
             if class_choice == "0":
-                self.set_hero_class("MAGICIAN", 70, 160, 15, 0.89, 1, 1, 1, True, False, False, 160, 160, 2)
+                self.set_hero_class("MAGICIAN", 70, 100, 5, 0.89, 1, 1, 1, True, False, False, 160, 160, 2)
             elif class_choice == "1":
-                self.set_hero_class("THIEF", 120, 140, 10, 1, 1, 0.89, 0.89, False, True, True, 60, 60, 3)
+                self.set_hero_class("THIEF", 120, 100, 10, 1, 1, 0.89, 0.89, False, True, True, 60, 60, 3)
             elif class_choice == "2":
-                self.set_hero_class("SWORDSMAN", 50, 190, 30, 1, 0.89, 1, 1, False, False, False, 20, 20, 1)
+                self.set_hero_class("SWORDSMAN", 50, 100, 22, 1, 0.89, 1, 1, False, False, False, 20, 20, 1)
 
     def set_hero_class(self, hero_class: str, gold: int, hp: int, damage: int, magic_resist: float, physical_resist: float,
                     poison_resist: float, Toxin_resist: float , mana_recovery: bool, double_punch: bool, earning_coins_and_XP: bool,
@@ -253,9 +254,9 @@ class Game:
         self.player.speed = speed
 
     def load_game(self):
-        d.t.loadGame = True
+        self.tregers.loadGame = True
         self.save_manager.load_file()
-        d.t.loadGame = False
+        self.tregers.loadGame = False
 
         if not self.game_flags.errore_load:
             self.consolas.create_table(
@@ -333,13 +334,15 @@ if __name__ == "__main__":
     ability = d.Ability()
     world_values = d.WorldValues()
     console_settings = d.ConsoleSettings()
+    tregers = d.Tregers()
     save_manager = d.SaveManager(player, resistances, equipment, ability)
 
+
     console_settings.set_console_buffer_size(400, 59)
-    console_settings.set_console_font(font_size=22)
+    console_settings.set_console_font(font_size=console_settings.get_font_size())
 
     def main(stdscr):
-        game = Game(config ,player, equipment, game_flags, logo, resistances, ability, save_manager, world_values, stdscr, console_settings)
+        game = Game(config ,player, equipment, game_flags, logo, resistances, ability, save_manager, world_values, stdscr, console_settings, tregers)
         game.start()
             
     try:

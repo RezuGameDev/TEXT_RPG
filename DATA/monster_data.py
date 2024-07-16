@@ -2,7 +2,7 @@ forest = {
     "goblin": {
         "name": "goblin",
         "Hp": 35,
-        "Damage": 5,
+        "Damage": 22,
         "Xp": 5,
         "Coin": 10,
         "PhysicalResist": 1,
@@ -20,7 +20,7 @@ forest = {
     "forest_troll": {
         "name": "forest troll",
         "Hp": 50,
-        "Damage": 8,
+        "Damage": 25,
         "Xp": 8,
         "Coin": 15,
         "PhysicalResist": 0.8,
@@ -38,7 +38,7 @@ forest = {
     "forest_witcher": {
         "name": "forest witcher",
         "Hp": 40,
-        "Damage": 7,
+        "Damage": 28,
         "Xp": 7,
         "Coin": 12,
         "PhysicalResist": 1,
@@ -56,7 +56,7 @@ forest = {
     "wooden_ent": {
         "name": "wooden ent",
         "Hp": 60,
-        "Damage": 6,
+        "Damage": 20,
         "Xp": 10,
         "Coin": 18,
         "PhysicalResist": 1,
@@ -74,7 +74,7 @@ forest = {
     "forest_ghost": {
         "name": "forest ghost",
         "Hp": 30,
-        "Damage": 4,
+        "Damage": 18,
         "Xp": 6,
         "Coin": 8,
         "PhysicalResist": 0.7,
@@ -94,7 +94,7 @@ forest = {
     "forest_wildSquirrel": {
         "name": "forest wildSquirrel",
         "Hp": 7,
-        "Damage": 1,
+        "Damage": 17,
         "Xp": 7,
         "Coin": 4,
         "PhysicalResist": 0.3,
@@ -113,7 +113,7 @@ forest = {
     "forest_magician": {
         "name": "forest magician",
         "Hp": 45,
-        "Damage": 6,
+        "Damage": 26,
         "Xp": 10,
         "Coin": 13,
         "PhysicalResist": 0.9,
@@ -132,7 +132,7 @@ forest = {
     "forest_wyrmling": {
         "name": "forest wyrmling",
         "Hp": 75,
-        "Damage": 11,
+        "Damage": 26,
         "Xp": 70,
         "Coin": 35,
         "PhysicalResist": 0.9,

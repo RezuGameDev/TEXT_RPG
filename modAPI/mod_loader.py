@@ -3,7 +3,6 @@ import importlib.util
 from modAPI.base_mod import BaseMod
 import time as t
 
-
 class ModLoader:
     def __init__(self, core, win, config, mods_directory='mods'):
         self.mods_directory = mods_directory
@@ -34,30 +33,31 @@ class ModLoader:
     def run_mods(self):
         for mod in self.mods:
             mod.run()
+        self.core.start_mod_updates()  # Запуск обновления модов параллельно
 
     def print_mods_info(self):
         self.win.clear()
-        self.win.addstr(self.y, 0,"Loaded Mods Information:")
-        self.y=+1
+        self.win.addstr(self.y, 0, "Loaded Mods Information:")
+        self.y += 1
         t.sleep(self.config.delayOutput)
         self.win.refresh()
         for mod in self.mods:
-            self.win.addstr(self.y, 0,f" => {mod.mod_name}:")
-            self.y = self.y + 1
+            self.win.addstr(self.y, 0, f" => {mod.mod_name}:")
+            self.y += 1
             t.sleep(self.config.delayOutput)
             self.win.refresh()
 
-            self.win.addstr(self.y, 0,f"  -> {mod.mod_description}")
-            self.y = self.y + 1
+            self.win.addstr(self.y, 0, f"  -> {mod.mod_description}")
+            self.y += 1
             t.sleep(self.config.delayOutput)
             self.win.refresh()
 
-            self.win.addstr(self.y, 0,f"  -> {mod.author}")
-            self.y = self.y + 1
+            self.win.addstr(self.y, 0, f"  -> {mod.author}")
+            self.y += 1
             t.sleep(self.config.delayOutput)
             self.win.refresh()
 
-            self.win.addstr(self.y, 0,f"  -> {mod.version}")
-            self.y = self.y + 1
+            self.win.addstr(self.y, 0, f"  -> {mod.version}")
+            self.y += 1
             t.sleep(self.config.delayOutput)
             self.win.refresh()

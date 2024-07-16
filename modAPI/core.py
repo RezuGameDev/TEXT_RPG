@@ -1,8 +1,9 @@
-# core.py
 import time
+import threading
+from tkinter import messagebox
 
 class Core:
-    def __init__(self, Config, WorldValues, GameFlags, Resistances, Equipment, Player, Ability, SaveManager, Logo, Consolas, TableMenu):
+    def __init__(self, Config, WorldValues, GameFlags, Resistances, Equipment, Player, Ability, SaveManager, Logo, Consolas, TableMenu, Tregers):
         self.Config = Config
         self.WorldValues = WorldValues
         self.GameFlags = GameFlags
@@ -14,9 +15,12 @@ class Core:
         self.Logo = Logo
         self.Consolas = Consolas
         self.TableMenu = TableMenu
+        self.Tregers = Tregers
 
         self.mod_update_interval = 0.5  # Интервал обновления модов в секундах
         self.mods = []
+        self.mod_update_thread = threading.Thread(target=self.update_mods)
+        self.mod_update_thread.daemon = True
 
     def run(self):
         pass
@@ -26,3 +30,7 @@ class Core:
             for mod in self.mods:
                 mod.update()
             time.sleep(self.mod_update_interval)
+    
+    def start_mod_updates(self):
+        self.mod_update_thread.start()
+

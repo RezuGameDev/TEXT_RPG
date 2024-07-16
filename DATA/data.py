@@ -9,9 +9,9 @@ import json
 import ctypes
 import DATA.audio.data_audio as da
 import DATA.level_data as ld
-import DATA.tregers as t
 import DATA.item_data as itemd
 from EVENT.debug import debug
+from screeninfo import get_monitors
 
 # Получаем абсолютный путь к текущему скрипту
 current_directory = os.path.dirname(os.path.abspath(__file__))
@@ -21,14 +21,18 @@ save_dir = os.path.join(appdata_dir, 'TextRPG', 'gameSAVE')
 os.makedirs(save_dir, exist_ok=True)
 
 class Config:
-    delayOutput = 0.1
+    delayOutput = 0.03
     language = "EN" 
     anim = False
     
 
 class WorldValues:
     def __init__(self):
-        self.chances = [70, 30]
+        self.chances = {
+            "monstr": 40,
+            "shop": 15,
+            "void": 45
+        }
         self.shop_types = ["blacksmith", "alchemist"]
 
 class GameFlags:
@@ -73,7 +77,7 @@ class Player:
     def __init__(self):
         self.name = "NULL"
         self.heroClass = "NULL"
-        self.Dm = 20
+        self.Dm = 10
         self.Hp = 70
         self.maxHp = 70
         self.gold = 0
@@ -421,7 +425,7 @@ class Consolas:
                     self.win.addch(table_y, table_x, char)
             self.win.refresh()
             da.play_sound_print()
-            time.sleep(0.08)
+            time.sleep(0.02)
         
         self.win.refresh()
 
@@ -515,6 +519,27 @@ class ConsoleSettings:
         user32.SetWindowPos(hwnd, None, 0, 0, 0, 0, 0x0020)
         user32.ShowWindow(hwnd, 3)
 
+    def get_font_size(self):
+        monitors = get_monitors()
+        if not monitors:
+            return 10
+
+        monitor = monitors[0]
+        width, height = monitor.width, monitor.height
+
+        if width >= 3840 and height >= 2160:  # 4K
+            return 28
+        elif width >= 2560 and height >= 1440:  # 2K (QHD)
+            return 24
+        elif width >= 1920 and height >= 1080:  # Full HD
+            return 22
+        elif width >= 1600 and height >= 900:  # HD+
+            return 18
+        elif width >= 1360 and height >= 768:  # HD
+            return 15
+        else:
+            return 12
+
 class TableMenu:
     def __init__(self, config, win):
         self.config = config
@@ -595,7 +620,7 @@ class TableMenu:
         separator_down_info()
         da.play_sound_print()
 
-    def menu(self, title, options, additional_info=["","","","","",""], alignment="c", x=None, y=None, color='cyan', tips=True, clear=True):
+    def menu(self, title, options, additional_info=["","","","","",""], alignment="c", x=None, y=None, color='cyan', tips=True, clear=True, info_width=50):
         self.alignment = alignment
         curses.curs_set(0)
 
@@ -623,7 +648,7 @@ class TableMenu:
 
         menu_win = curses.newwin(len(options) + 5, 30, self.menu_y, self.menu_x)
         if tips:
-            info_win = curses.newwin(len(options) + 5, 50, self.info_y, self.info_x)
+            info_win = curses.newwin(len(options) + 5, info_width, self.info_y, self.info_x)
 
         c = 0
         option = 0
@@ -732,6 +757,14 @@ class TableMenu:
         curses.curs_set(0)
         self.is_first_display = True
         return text
+
+class Tregers:
+    def __init__(self):
+        self.startGame = False
+        self.autorsMeny = False
+        self.mainMeny = False
+        self.newGame = False
+        self.loadGame = False
 
 class PlayerDog:
     def __init__(self, x, y):
