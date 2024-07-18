@@ -42,6 +42,7 @@ class Game:
         self.win = None
         self.consolas = None
         self.event = None
+        self.tui = None
 
     def start(self):
         self.console_settings.set_borderless_fullscreen()
@@ -69,9 +70,10 @@ class Game:
     def load_modules(self):
         self.table_menu = d.TableMenu(self.config, self.win)
         self.consolas = d.Consolas(self.config, player, self.win)
-        self.item_manager = d.itemd.ItemManager(self.player, self.equipment, self.resistances, self.consolas)
+        self.item_manager = d.itemd.ItemManager(self.player, self.equipment, self.resistances, self.consolas, self.table_menu)
         self.core = Core(self.config, self.world_values, self.game_flags, self.resistances, self.equipment, self.player, self.ability, self.save_manager, self.logo, self.consolas, self.table_menu, self.tregers)
         self.event = event.Event(self.player, self.config, self.equipment, self.game_flags, self.world_values, self.ability, self.resistances, self.consolas, self.save_manager, self.win, self.table_menu, self.item_manager)
+        self.tui = self.event.TUI(self.game_flags, self.consolas, self.win, self.save_manager, self.table_menu, self.player, self.item_manager, self.world_values, self.config, self.equipment, self.ability, self.resistances)
 
 
         imports_list = [
@@ -152,11 +154,12 @@ class Game:
             "Code", "Fantomm",
             "Plot", "Факсянь",
             "ihateniggers",
-            separator_positions=[0, 1, 2, 3, 4, 5, 6],
-            alignment={0: "center", 2: "center", 4: "center", 6: "center"},
+            "didn't participate", "He'sCodi",
+            separator_positions=[0, 1, 2, 3, 4, 5, 6, 8, 9],
+            alignment={0: "center", 2: "center", 4: "center", 6: "center", 9:"center"},
         )
 
-        self.table_menu.menu("authors", ["Exit to menu"], color='cyan', y=11, tips=False, clear=False)
+        self.table_menu.menu("authors", ["Exit to menu"], color='cyan', y=9, tips=False, clear=False)
 
 
     def create_settings_table(self):
@@ -201,6 +204,8 @@ class Game:
                 self.win.getch()
             elif self.player.name == "NULL":
                 self.player.name = " "
+                self.set_hero_class("NULL", 0, 70, 10, -0.8, -0.8, -0.8, -0.8, False, False, False, 50, 50, 1)
+                self.player.item = [1, 1, 1]
                 self.game_flags.meny = False
                 self.game_flags.play = True
                 break
@@ -224,11 +229,11 @@ class Game:
             class_choice = self.table_menu.menu(title="classes" ,options=["MAGICIAN","THIEF","SWORDSMAN"] ,additional_info=class_info)
 
             if class_choice == "0":
-                self.set_hero_class("MAGICIAN", 70, 100, 5, 0.89, 1, 1, 1, True, False, False, 160, 160, 2)
+                self.set_hero_class("MAGICIAN", 70, 100, 5, 0.95, 1, 1, 1, True, False, False, 160, 160, 2)
             elif class_choice == "1":
-                self.set_hero_class("THIEF", 120, 100, 10, 1, 1, 0.89, 0.89, False, True, True, 60, 60, 3)
+                self.set_hero_class("THIEF", 120, 100, 10, 1, 1, 0.95, 0.95, False, True, True, 60, 60, 3)
             elif class_choice == "2":
-                self.set_hero_class("SWORDSMAN", 50, 100, 22, 1, 0.89, 1, 1, False, False, False, 20, 20, 1)
+                self.set_hero_class("SWORDSMAN", 50, 100, 22, 1, 0.95, 1, 1, False, False, False, 20, 20, 1)
 
     def set_hero_class(self, hero_class: str, gold: int, hp: int, damage: int, magic_resist: float, physical_resist: float,
                     poison_resist: float, Toxin_resist: float , mana_recovery: bool, double_punch: bool, earning_coins_and_XP: bool,
@@ -252,6 +257,8 @@ class Game:
         self.player.maxMana = max_mana
         self.player.mana = mana
         self.player.speed = speed
+
+        self.player.item = [1, 1]
 
     def load_game(self):
         self.tregers.loadGame = True
@@ -298,7 +305,7 @@ class Game:
             self.player.Py = getattr(d.ld, f"layer{self.player.layer}").YSpawn
 
         playerDog = d.PlayerDog(self.player.Px, self.player.Py)
-        self.event.start_game(self.player.layer, playerDog)
+        self.tui.start_game(self.player.layer, playerDog)
 
     def show_game_over_screen(self):
         self.consolas.create_table(

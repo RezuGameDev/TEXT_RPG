@@ -57,23 +57,47 @@ class ItemManager:
 
         def equip(self):
             if self.item_type == 2:
-                self.manager.resistances.helmetResistInt = self.physical_resist
-                self.manager.player.helmet = self.name
-                self.manager.equipment.helmetID = self.ID
-                self.manager.player.item.remove(self.ID)
+                if self.manager.equipment.helmetID == None:
+                    self.manager.resistances.helmetResistInt = self.physical_resist
+                    self.manager.player.helmet = self.name
+                    self.manager.equipment.helmetID = self.ID
+                    self.manager.player.item.remove(self.ID)
+                else:
+                    self.manager.player.item.append(self.manager.equipment.helmetID)
+
+                    self.manager.resistances.helmetResistInt = self.physical_resist
+                    self.manager.player.helmet = self.name
+                    self.manager.equipment.helmetID = self.ID
+                    self.manager.player.item.remove(self.ID)
 
             elif self.item_type == 3:
-                self.manager.resistances.chestplateResistInt = self.physical_resist
-                self.manager.player.chestplate = self.name
-                self.manager.equipment.chestplateID = self.ID
-                self.manager.player.item.remove(self.ID)
+                if self.manager.equipment.chestplateID == None:
+                    self.manager.resistances.chestplateResistInt = self.physical_resist
+                    self.manager.player.chestplate = self.name
+                    self.manager.equipment.chestplateID = self.ID
+                    self.manager.player.item.remove(self.ID)
+                else:
+                    self.manager.player.item.append(self.manager.equipment.chestplateID)
+
+                    self.manager.resistances.chestplateResistInt = self.physical_resist
+                    self.manager.player.chestplate = self.name
+                    self.manager.equipment.chestplateID = self.ID
+                    self.manager.player.item.remove(self.ID)
 
             elif self.item_type == 4:
                 if self.manager.player.heroClass == "SWORDSMAN":
-                    self.manager.player.Dm += self.damage
-                    self.manager.player.weapon = self.name
-                    self.manager.equipment.weaponID = self.ID
-                    self.manager.player.item.remove(self.ID)
+                    if self.manager.equipment.weaponID == None:
+                        self.manager.player.Dm += self.damage
+                        self.manager.player.weapon = self.name
+                        self.manager.equipment.weaponID = self.ID
+                        self.manager.player.item.remove(self.ID)
+                    else:
+                        self.manager.player.item.append(self.manager.equipment.weaponID)
+
+                        self.manager.player.Dm += self.damage
+                        self.manager.player.weapon = self.name
+                        self.manager.equipment.weaponID = self.ID
+                        self.manager.player.item.remove(self.ID)
                 else:
                     self.manager.consolas.create_table("this weapon is not suitable for you", alignment={0: "center"}, table_width=35)
 
@@ -82,59 +106,93 @@ class ItemManager:
                     while True:
                         choice = self.manager.table_menu.menu("inventory", ["left hand", "right hand"], tips=False, y=1)
                         if choice == "0":
-                            self.manager.player.Dm += self.damage
-                            self.manager.player.weapon = self.name
-                            self.manager.equipment.weaponID = self.ID
-                            self.manager.player.item.remove(self.ID)
+                            if self.manager.equipment.weaponID == None:
+                                self.manager.player.Dm += self.damage
+                                self.manager.player.weapon = self.name
+                                self.manager.equipment.weaponID = self.ID
+                                self.manager.player.item.remove(self.ID)
+                            else:
+                                self.manager.player.item.append(self.manager.equipment.weaponID)
+
+                                self.manager.player.Dm += self.damage
+                                self.manager.player.weapon = self.name
+                                self.manager.equipment.weaponID = self.ID
+                                self.manager.player.item.remove(self.ID)
                         elif choice == "1":
-                            self.manager.player.Dm += self.damage
-                            self.manager.player.weapon2 = self.name
-                            self.manager.equipment.weapon2ID = self.ID
-                            self.manager.player.item.remove(self.ID)
+                            if self.manager.equipment.weapon2ID == None:
+                                self.manager.player.Dm += self.damage
+                                self.manager.player.weapon2 = self.name
+                                self.manager.equipment.weapon2ID = self.ID
+                                self.manager.player.item.remove(self.ID)
+                            else:
+                                self.manager.player.item.append(self.manager.equipment.weapon2)
+
+                                self.manager.player.Dm += self.damage
+                                self.manager.player.weapon2 = self.name
+                                self.manager.equipment.weapon2ID = self.ID
+                                self.manager.player.item.remove(self.ID)
                 else:
                     self.manager.consolas.create_table("this weapon is not suitable for you", alignment={0: "center"}, table_width=35)
 
             elif self.item_type == 6:
                 if self.manager.player.heroClass == "MAGICIAN":
-                    self.manager.player.Dm += self.damage
-                    self.manager.player.weapon = self.name
-                    self.manager.equipment.weaponID = self.ID
-                    self.manager.player.maxMana += self.mana
-                    self.manager.player.item.remove(self.ID)
+                    if self.manager.equipment.weaponID == None:
+                        self.manager.player.Dm += self.damage
+                        self.manager.player.weapon = self.name
+                        self.manager.equipment.weaponID = self.ID
+                        self.manager.player.maxMana += self.mana
+                        self.manager.player.item.remove(self.ID)
+                    else:
+                        self.manager.player.item.append(self.manager.equipment.weaponID)
+
+                        self.manager.player.Dm += self.damage
+                        self.manager.player.weapon = self.name
+                        self.manager.equipment.weaponID = self.ID
+                        self.manager.player.maxMana += self.mana
+                        self.manager.player.item.remove(self.ID)
                 else:
                     self.manager.consolas.create_table("this weapon is not suitable for you", alignment={0: "center"}, table_width=35)
 
             elif self.item_type == 7:
                 if self.manager.player.heroClass == "SWORDSMAN":
-                    self.manager.resistances.shieldResistInt = self.physical_resist
-                    self.manager.player.weapon2 = self.name
-                    self.manager.equipment.weapon2ID = self.ID
-                    self.manager.player.item.remove(self.ID)
+                    if self.manager.equipment.weapon2ID == None:
+                        self.manager.resistances.shieldResistInt = self.physical_resist
+                        self.manager.player.weapon2 = self.name
+                        self.manager.equipment.weapon2ID = self.ID
+                        self.manager.player.item.remove(self.ID)
+                    else:
+                        self.manager.player.item.append(self.manager.equipment.weapon2ID)
+
+                        self.manager.resistances.shieldResistInt = self.physical_resist
+                        self.manager.player.weapon2 = self.name
+                        self.manager.equipment.weapon2ID = self.ID
+                        self.manager.player.item.remove(self.ID)
                 else:
                     self.manager.consolas.create_table("this weapon is not suitable for you", alignment={0: "center"}, table_width=35)
 
-    def __init__(self, player, equipment, resistances, consolas):
+    def __init__(self, player, equipment, resistances, consolas, table_menu):
         self.player = player
         self.equipment = equipment
         self.resistances = resistances
         self.consolas = consolas
+        self.table_menu = table_menu
 
         # Health Potions
         self.health_potions = [
-            self.Potion(self, 0, "Health Potion I", "Common", 1, 5, 14, "Hp + 10", hp_increase=10),
-            self.Potion(self, 1, "Health Potion II", "Uncommon", 1, 15, 24, "Hp + 15", hp_increase=15),
-            self.Potion(self, 2, "Health Potion III", "Rare", 1, 25, 34, "Hp + 20", hp_increase=20),
-            self.Potion(self, 3, "Health Potion IV", "Epic", 1, 35, 44, "Hp + 25", hp_increase=25),
-            self.Potion(self, 4, "Health Potion V", "Legendary", 1, 45, 54, "Hp + 35", hp_increase=35)
+            self.Potion(self, 0, "Health Potion I", "Common", 1, 5, 14, "Hp + 20", hp_increase=20),
+            self.Potion(self, 1, "Health Potion II", "Uncommon", 1, 15, 24, "Hp + 30", hp_increase=30),
+            self.Potion(self, 2, "Health Potion III", "Rare", 1, 25, 34, "Hp + 40", hp_increase=40),
+            self.Potion(self, 3, "Health Potion IV", "Epic", 1, 35, 44, "Hp + 50", hp_increase=50),
+            self.Potion(self, 4, "Health Potion V", "Legendary", 1, 45, 54, "Hp + 70", hp_increase=70)
         ]
 
         # Mana Elixirs
         self.mana_elixirs = [
-            self.Potion(self, 5, "Mana Elixir I", "Common", 1, 5, 14, "Mana + 10", mana_increase=10),
-            self.Potion(self, 6, "Mana Elixir II", "Uncommon", 1, 15, 24, "Mana + 20", mana_increase=20),
-            self.Potion(self, 7, "Mana Elixir III", "Rare", 1, 25, 34, "Mana + 30", mana_increase=30),
-            self.Potion(self, 8, "Mana Elixir IV", "Epic", 1, 35, 44, "Mana + 40", mana_increase=40),
-            self.Potion(self, 9, "Mana Elixir V", "Legendary", 1, 45, 54, "Mana + 50", mana_increase=50)
+            self.Potion(self, 5, "Mana Elixir I", "Common", 1, 5, 14, "Mana + 20", mana_increase=20),
+            self.Potion(self, 6, "Mana Elixir II", "Uncommon", 1, 15, 24, "Mana + 30", mana_increase=30),
+            self.Potion(self, 7, "Mana Elixir III", "Rare", 1, 25, 34, "Mana + 40", mana_increase=40),
+            self.Potion(self, 8, "Mana Elixir IV", "Epic", 1, 35, 44, "Mana + 50", mana_increase=50),
+            self.Potion(self, 9, "Mana Elixir V", "Legendary", 1, 45, 54, "Mana + 70", mana_increase=70)
         ]
 
         # Strength Tonics
