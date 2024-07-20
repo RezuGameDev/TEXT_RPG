@@ -43,6 +43,7 @@ class Game:
         self.consolas = None
         self.event = None
         self.tui = None
+        self.spells = None
 
     def start(self):
         self.console_settings.set_borderless_fullscreen()
@@ -71,9 +72,10 @@ class Game:
         self.table_menu = d.TableMenu(self.config, self.win)
         self.consolas = d.Consolas(self.config, player, self.win)
         self.item_manager = d.itemd.ItemManager(self.player, self.equipment, self.resistances, self.consolas, self.table_menu)
-        self.core = Core(self.config, self.world_values, self.game_flags, self.resistances, self.equipment, self.player, self.ability, self.save_manager, self.logo, self.consolas, self.table_menu, self.tregers)
-        self.event = event.Event(self.player, self.config, self.equipment, self.game_flags, self.world_values, self.ability, self.resistances, self.consolas, self.save_manager, self.win, self.table_menu, self.item_manager)
-        self.tui = self.event.TUI(self.game_flags, self.consolas, self.win, self.save_manager, self.table_menu, self.player, self.item_manager, self.world_values, self.config, self.equipment, self.ability, self.resistances)
+        self.spells = d.spells.Spells(self.player, self.consolas, self.table_menu, self.ability, self.equipment, self.resistances, self.game_flags, self.win)
+        self.core = Core(self.config, self.world_values, self.game_flags, self.resistances, self.equipment, self.player, self.ability, self.save_manager, self.logo, self.consolas, self.table_menu, self.tregers, self.spells)
+        self.event = event.Event(self.player, self.config, self.equipment, self.game_flags, self.world_values, self.ability, self.resistances, self.consolas, self.save_manager, self.win, self.table_menu, self.item_manager, self.spells)
+        self.tui = self.event.TUI(self.game_flags, self.consolas, self.win, self.save_manager, self.table_menu, self.player, self.item_manager, self.world_values, self.config, self.equipment, self.ability, self.resistances, self.spells)
 
 
         imports_list = [
@@ -204,7 +206,7 @@ class Game:
                 self.win.getch()
             elif self.player.name == "NULL":
                 self.player.name = " "
-                self.set_hero_class("NULL", 0, 70, 10, -0.8, -0.8, -0.8, -0.8, False, False, False, 50, 50, 1)
+                self.set_hero_class("NULL", 0, 70, 10, -0.8, -0.8, -0.8, -0.8, False, False, True, 50, 50, 1, 0)
                 self.player.item = [1, 1, 1]
                 self.game_flags.meny = False
                 self.game_flags.play = True
@@ -229,15 +231,15 @@ class Game:
             class_choice = self.table_menu.menu(title="classes" ,options=["MAGICIAN","THIEF","SWORDSMAN"] ,additional_info=class_info)
 
             if class_choice == "0":
-                self.set_hero_class("MAGICIAN", 70, 100, 5, 0.95, 1, 1, 1, True, False, False, 160, 160, 2)
+                self.set_hero_class("MAGICIAN", 70, 100, 5, 0.95, 1, 1, 1, True, False, False, 160, 160, 2, 1)
             elif class_choice == "1":
-                self.set_hero_class("THIEF", 120, 100, 10, 1, 1, 0.95, 0.95, False, True, True, 60, 60, 3)
+                self.set_hero_class("THIEF", 120, 100, 10, 1, 1, 0.95, 0.95, False, True, True, 60, 60, 3, 1.5)
             elif class_choice == "2":
-                self.set_hero_class("SWORDSMAN", 50, 100, 22, 1, 0.95, 1, 1, False, False, False, 20, 20, 1)
+                self.set_hero_class("SWORDSMAN", 50, 100, 22, 1, 0.95, 1, 1, False, False, False, 20, 20, 1, 0.5)
 
     def set_hero_class(self, hero_class: str, gold: int, hp: int, damage: int, magic_resist: float, physical_resist: float,
                     poison_resist: float, Toxin_resist: float , mana_recovery: bool, double_punch: bool, earning_coins_and_XP: bool,
-                    max_mana: int, mana: int, speed: int):
+                    max_mana: int, mana: int, speed: int, luck: int,):
         self.game_flags.meny = False
         self.game_flags.creating_hero = False
         self.game_flags.play = True
@@ -257,8 +259,18 @@ class Game:
         self.player.maxMana = max_mana
         self.player.mana = mana
         self.player.speed = speed
+        self.player.luck = luck
 
         self.player.item = [1, 1]
+
+        if self.player.heroClass == "MAGICIAN":
+            self.player.spells = [2, 3]
+        elif self.player.heroClass == "THIEF":
+            self.player.spells = [1]
+        elif self.player.heroClass == "SWORDSMAN":
+            pass
+        elif self.player.heroClass == "NULL":
+            self.player.spells = [0]
 
     def load_game(self):
         self.tregers.loadGame = True
@@ -320,6 +332,7 @@ class Game:
             table_width=25,
         )
         self.win.getch()
+        d.os.remove(d.save_path)
         self.game_flags.play = False
         self.game_flags.meny = True
         self.game_flags.game_over = False

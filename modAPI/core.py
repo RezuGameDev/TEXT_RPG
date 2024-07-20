@@ -3,7 +3,7 @@ import threading
 from tkinter import messagebox
 
 class Core:
-    def __init__(self, Config, WorldValues, GameFlags, Resistances, Equipment, Player, Ability, SaveManager, Logo, Consolas, TableMenu, Tregers):
+    def __init__(self, Config, WorldValues, GameFlags, Resistances, Equipment, Player, Ability, SaveManager, Logo, Consolas, TableMenu, Tregers, Spells):
         self.Config = Config
         self.WorldValues = WorldValues
         self.GameFlags = GameFlags
@@ -16,6 +16,7 @@ class Core:
         self.Consolas = Consolas
         self.TableMenu = TableMenu
         self.Tregers = Tregers
+        self.Spells = Spells
 
         self.mod_update_interval = 0.5  # Интервал обновления модов в секундах
         self.mods = []

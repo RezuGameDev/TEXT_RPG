@@ -10,8 +10,10 @@ import ctypes
 import DATA.audio.data_audio as da
 import DATA.level_data as ld
 import DATA.item_data as itemd
+import DATA.spells as spells
 from EVENT.debug import debug
 from screeninfo import get_monitors
+from concurrent.futures import ThreadPoolExecutor
 
 # Получаем абсолютный путь к текущему скрипту
 current_directory = os.path.dirname(os.path.abspath(__file__))
@@ -19,6 +21,7 @@ openInventory_path = os.path.join(current_directory, 'EVENT', 'openInventory.py'
 appdata_dir = os.getenv('LOCALAPPDATA')
 save_dir = os.path.join(appdata_dir, 'TextRPG', 'gameSAVE')
 os.makedirs(save_dir, exist_ok=True)
+save_path = os.path.join(save_dir, "save.json")
 
 class Config:
     delayOutput = 0.03
@@ -53,6 +56,9 @@ class GameFlags:
         self.room_map = []
         self.battle = False
         self.seting = False
+        self.monstr_anim = False
+        self.monstr_idle_anim = False
+        self.monstr_dead_anim = False
 
 class Resistances:
     def __init__(self):
@@ -100,6 +106,8 @@ class Player:
         self.chestplate = ""
         self.weapon = ""
         self.weapon2 = ""
+        self.luck = 0
+        self.spells = [0]
 
 class Ability:
     def __init__(self):
@@ -156,6 +164,8 @@ class SaveManager:
             "mana": self.player.mana,
             "maxMana": self.player.maxMana,
             "speed": self.player.speed,
+            "luck": self.player.luck,
+            "spells": self.player.spells
         }
 
         with open(os.path.join(save_dir, "save.json"), "w") as f:
@@ -171,7 +181,7 @@ class SaveManager:
                              "EarningCoinsAndXP", "improvementStar", "points", "item", "helmet", "chestplate",
                              "weapon", "weapon2", "layer", "Px", "Py", "MagicPhysicalResistInt", "helmetResistInt",
                              "chestplateResistInt", "shieldResistInt", "helmetID", "chestplateID", "shieldID", "weaponID", 
-                             "weapon2ID", "playerMonstronomicon", "Effects", "mana", "maxMana", "speed"]
+                             "weapon2ID", "playerMonstronomicon", "Effects", "mana", "maxMana", "speed", "luck", "spells"]
             for key in required_keys:
                 if key not in data:
                     raise KeyError(f"Key '{key}' not found in the loaded data")
@@ -216,6 +226,8 @@ class SaveManager:
             self.player.mana = data["mana"]
             self.player.maxMana = data["maxMana"]
             self.player.speed = data["speed"]
+            self.player.luck = data["luck"]
+            self.player.spells = data["spells"]
             
         except Exception as e:
             print(f"Error loading game: {e}")
@@ -255,7 +267,7 @@ class Consolas:
         self.table_y = 1
         self.alignmentTable = None
 
-    def calculate_position(self, width, height, x=None, y=None):
+    def calculate_position(self, width, height, x=None, y=None, Xdo="=", Ydo="="):
         if self.alignmentTable == 'c':
             self.table_x = (curses.COLS - width) // 2
             self.table_y = (curses.LINES - height) // 2
@@ -266,15 +278,25 @@ class Consolas:
             self.table_x = 1
             self.table_y = 1
 
-        if x is not None:
-            self.table_x = x
-        if y is not None:
-            self.table_y = y
+        if x != None :
+            if Xdo == "=":
+                self.table_x = x
+            elif Xdo == "-":
+                self.table_x = self.table_x - x
+            elif Xdo == "+":
+                self.table_x = self.table_x + x
+        if y != None:
+            if Ydo == "=":
+                self.table_y = y
+            elif Ydo == "-":
+                self.table_y = self.table_y - y
+            elif Ydo == "+":
+                self.table_y = self.table_y + y
 
-    def create_table(self, *args, style="info", use_clear=True, separator_positions=None, alignment=None, alignmentTable="c", table_width=22, x=None, y=None):
+    def create_table(self, *args, style="info", use_clear=True, separator_positions=None, alignment=None, alignmentTable="c", table_width=22, x=None, y=None, Xdo="=", Ydo="="):
         self.alignmentTable = alignmentTable
 
-        self.calculate_position(table_width + 7, len(args) + 2, x, y)
+        self.calculate_position(table_width + 7, len(args) + 2, x, y, Xdo, Ydo)
 
         def separator_up_info():
             self.win.addstr(self.table_y, self.table_x, "Xx" + "_" * (table_width + 2) + "xX")
@@ -392,11 +414,12 @@ class Consolas:
         da.play_sound_print()
         self.win.refresh()
 
-    def play_animation(self, frames, delay=0.3, alignmentTable="c", x=None, y=None):
+    def play_animation(self, frames, delay=0.3, alignmentTable="c", x=None, y=None, clear=True, Xdo="=", Ydo="="):
         self.alignmentTable = alignmentTable
-        self.calculate_position(len(frames[0]), len(frames), x, y)
+        self.calculate_position(len(frames[0]), len(frames), x, y, Xdo, Ydo)
 
-        self.win.clear()
+        if clear:
+            self.win.clear()
         for frame in frames:
             self.win.addstr(self.table_y, self.table_x, frame)
             da.play_sound_print2()
@@ -404,13 +427,13 @@ class Consolas:
             self.win.refresh()
             self.table_y+=1
 
-    def display_map(self, map_array, player, alignmentTable="c", x=None, y=None):
+    def display_map(self, map_array, player, alignmentTable="c", x=None, y=None, Xdo="=", Ydo="="):
         self.alignmentTable = alignmentTable
 
         self.win.clear()
         self.win.refresh()
 
-        self.calculate_position(len(map_array[0]), len(map_array), x, y)
+        self.calculate_position(len(map_array[0]), len(map_array), x, y, Xdo, Ydo)
 
         for row_index, row in enumerate(map_array):
             for char_index, char in enumerate(row):

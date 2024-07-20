@@ -14,10 +14,15 @@ import EVENT.debug as db
 import DATA.data as d
 
 class Monster:
-    def __init__(self):
+    def __init__(self, player):
+        self.player = player
+
         random_monster = random.choice(list(md.forest.keys()))
+        while md.forest[random_monster]["Lv"] >= self.player.Lv + 2:
+            random_monster = random.choice(list(md.forest.keys()))
         self.name = md.forest[random_monster]["name"]
         self.hp = md.forest[random_monster]["Hp"]
+        self.max_hp = md.forest[random_monster]["MaxHp"]
         self.damage = md.forest[random_monster]["Damage"]
         self.p_resist = md.forest[random_monster]["PhysicalResist"]
         self.m_resist = md.forest[random_monster]["MagicResist"]
@@ -28,9 +33,15 @@ class Monster:
         self.xp = md.forest[random_monster]["Xp"]
         self.coin = md.forest[random_monster]["Coin"]
         self.speed = md.forest[random_monster]["speed"]
+        self.lv = md.forest[random_monster]["Lv"]
+        self.item = md.forest[random_monster]["item"]
+        self.luck = md.forest[random_monster]["luck"]
+        self.frame0 = md.forest[random_monster]["IDLE_1"]
+        self.frame1 = md.forest[random_monster]["IDLE_2"]
+        self.dead_frame0 = md.forest[random_monster]["DEAD"]
 
 class BaseEvent:
-    def __init__(self, player, config, equipment, game_flags, world_values, ability, resistances, consolas, save_manager, win, table_menu, item_meneger):
+    def __init__(self, player, config, equipment, game_flags, world_values, ability, resistances, consolas, save_manager, win, table_menu, item_meneger, spells):
         self.player = player
         self.config = config
         self.equipment = equipment
@@ -43,12 +54,13 @@ class BaseEvent:
         self.win = win
         self.table_menu = table_menu
         self.item_meneger = item_meneger
+        self.spells = spells
 
 class Event(BaseEvent):
-    def __init__(self, player, config, equipment, game_flags, world_values, ability, resistances, consolas, save_manager, win, table_menu, item_meneger):
-        super().__init__(player, config, equipment, game_flags, world_values, ability, resistances, consolas, save_manager, win, table_menu, item_meneger)
+    def __init__(self, player, config, equipment, game_flags, world_values, ability, resistances, consolas, save_manager, win, table_menu, item_meneger, spells):
+        super().__init__(player, config, equipment, game_flags, world_values, ability, resistances, consolas, save_manager, win, table_menu, item_meneger, spells)
     class TUI:
-        def __init__(self, game_flags, consolas, win, save_manager, table_menu, player, item_meneger, world_values, config, equipment, ability, resistances):
+        def __init__(self, game_flags, consolas, win, save_manager, table_menu, player, item_meneger, world_values, config, equipment, ability, resistances, spells):
             self.game_flags = game_flags
             self.consolas = consolas
             self.win = win
@@ -61,6 +73,7 @@ class Event(BaseEvent):
             self.equipment = equipment
             self.ability = ability
             self.resistances = resistances
+            self.spells = spells
 
         def openInventory(self):
             self.win.clear()
@@ -89,7 +102,7 @@ class Event(BaseEvent):
                     f"name : {self.player.name}",
                     f"class : {self.player.heroClass}",
                     f"HP : {self.player.Hp} / {self.player.maxHp}",
-                    f"Dm = {self.player.Dm}",
+                    f"Dm : {self.player.Dm}",
                     f"gold : {self.player.gold}",
                     f"XP : {self.player.Xp} / {self.player.XpToLv}",
                     f"Lv : {self.player.Lv}",
@@ -152,6 +165,7 @@ class Event(BaseEvent):
                     self.win,
                     self.table_menu,
                     self.item_meneger,
+                    self.spells,
                 )
                 monstar.monster_encounter()
 
@@ -172,7 +186,8 @@ class Event(BaseEvent):
                     self.save_manager,
                     self.win,
                     self.table_menu,
-                    self.item_meneger
+                    self.item_meneger,
+                    self.spells,
                 )
                 shop.shop()
                 # Изменяем шансы для следующего события
@@ -409,24 +424,41 @@ class Event(BaseEvent):
                         self.consolas.create_table("")
 
     class MonsterAtak(BaseEvent):
-        def __init__(self, player, config, equipment, game_flags, world_values, ability, resistances, consolas, save_manager, win, table_menu, item_meneger):
-            super().__init__(player, config, equipment, game_flags, world_values, ability, resistances, consolas, save_manager, win, table_menu, item_meneger)
-            self.tui = Event.TUI(game_flags, consolas, win, save_manager, table_menu, player, item_meneger, world_values, config, equipment, ability, resistances)
+        def __init__(self, player, config, equipment, game_flags, world_values, ability, resistances, consolas, save_manager, win, table_menu, item_meneger, spells):
+            super().__init__(player, config, equipment, game_flags, world_values, ability, resistances, consolas, save_manager, win, table_menu, item_meneger, spells)
+            self.tui = Event.TUI(game_flags, consolas, win, save_manager, table_menu, player, item_meneger, world_values, config, equipment, ability, resistances, spells)
 
         def monster_encounter(self):
+            self.hit = 1
             self.game_flags.battle = True
-            self.monster = Monster()
+            self.monster = Monster(self.player)
+            self.hit = 1
+
+            megic_index = 1
+            name_spells = ["exit"]
+            classes_spells = {}
+
+            for spells_id in self.player.spells:  # предположим, что player.spells содержит список ID заклинаний
+                if spells_id in self.spells.all_spells:
+                    class_spells = self.spells.all_spells[spells_id]
+                    classes_spells[megic_index] = class_spells
+                    name_spells.append(class_spells.name)
+                    megic_index += 1
 
             self.consolas.create_table( f"you noticed a {self.monster.name} on your way", alignment={0: "center"}, table_width=40)
             self.win.getch()
             d.da.stop_background_music()
             d.da.play_battle_music()
 
+            self.monstr_win = d.curses.newwin(18, 13, 10, 10)
+
             while self.game_flags.battle:
+
                 self.consolas.create_table(
                     f"{self.monster.name}",
-                    f"HP : {self.monster.hp}",
+                    f"HP : {self.monster.hp} / {self.monster.max_hp}",
                     f"DAMAGE : {self.monster.damage}",
+                    f"Lv : {self.monster.lv}",
                     separator_positions=[0],
                     alignment={0: "center"},
                     table_width=25,
@@ -434,18 +466,24 @@ class Event(BaseEvent):
                     x=1,
                 )
                 self.consolas.create_table(
-                    f"{self.player.name}",
-                    f"HP : {self.player.Hp}",
-                    f"DAMAGE : {self.player.Dm}",
-                    use_clear=False,
+                    f"name : {self.player.name}",
+                    f"class : {self.player.heroClass}",
+                    f"HP : {self.player.Hp} / {self.player.maxHp}",
+                    f"Dm : {self.player.Dm}",
+                    f"gold : {self.player.gold}",
+                    f"XP : {self.player.Xp} / {self.player.XpToLv}",
+                    f"Lv : {self.player.Lv}",
+                    f"Mana : {self.player.mana} / {self.player.maxMana}",
+                    f"IS : {self.player.improvementStar}",
+                    f"layer : {self.player.layer} / 9",
                     separator_positions=[0],
                     alignment={0: "center"},
-                    table_width=25,
                     alignmentTable="r",
+                    use_clear= False,
                     y=1,
                 )
-
-                action = self.table_menu.menu(title="battle", options=["attack", "inventory", "run"], tips=False, clear=False)
+                self.consolas.play_animation(frames=self.monster.frame0, delay=0.03, y=5, x=1, clear=False, Xdo="-")
+                action = self.table_menu.menu(title="battle", options=["attack", "inventory", "magic", "run"], tips=False, clear=False)
 
                 if action == "0":
                     self.attack_monster(self.monster)
@@ -453,19 +491,77 @@ class Event(BaseEvent):
                     self.tui.openInventory()
 
                 elif action == "2":
+                    use_magic = self.table_menu.menu(title="magic", options=name_spells, tips=False)
+
+                    if use_magic.isdigit() and int(use_magic) in classes_spells:
+                        chosen_spell = classes_spells[int(use_magic)]
+                        
+                        while (True):
+                            choice = self.table_menu.menu("magic", ["INFO","USE","BACK"], tips=False)
+
+                            if choice == "0":
+                                self.consolas.create_table(chosen_spell.info , alignment={0 : "center"}, table_width=22)
+                                self.win.getch()
+
+                            if choice == "1":
+                                self.monster.hp, self.hit = self.spells.use_spell(chosen_spell.ID, self.monster.hp, self.monster.max_hp)
+
+                                break
+                            
+                            if choice == "2":
+                                break
+                    elif use_magic == "0":
+                        pass
+
+                elif action == "3":
                     if self.run_from_monster(self.monster):
                         break
+                
+                if self.player.mana < self.player.maxMana:
+                    if self.ability.ManaRecovery:
+                        self.player.mana += 5
+                    else:
+                        self.player.mana += 2
+                    
+                    if self.player.mana > self.player.maxMana:
+                        self.player.mana = self.player.maxMana
 
                 if self.monster.hp <= 0:
                     self.victory(self.monster)
                     break
-                self.monster_attack(self.monster)
+
+                if self.monster.hp <= self.monster.max_hp * 0.5 and any(value in self.monster.item for value in [0, 1, 2]):
+                    item = random.choice(self.monster.item)
+                    if item == 0:
+                        self.monster.hp += 10
+                        self.consolas.create_table("the monster drinks the potion, it restores 10 HP", separator_positions=[0], alignment={0: "center"}, table_width=32)
+                        self.win.getch()
+                    elif item == 1:
+                        self.monster.hp += 20
+                        self.consolas.create_table("the monster drinks the potion, it restores 20 HP", separator_positions=[0], alignment={0: "center"}, table_width=32)
+                        self.win.getch()
+                    elif item == 2:
+                        self.monster.hp += 30
+                        self.consolas.create_table("the monster drinks the potion, it restores 30 HP", separator_positions=[0], alignment={0: "center"}, table_width=32)
+                        self.win.getch()
+                    self.hit = 0
+
+                if self.monster.hp <= self.monster.max_hp * 0.2:
+                    if d.r.randint(1, 20) + self.monster.speed - self.monster.aggression + self.monster.luck > d.r.randint(1, 20) + self.player.speed + self.player.luck:
+                        self.consolas.create_table("The monster ran away", "Gold : 0", "XP : 0", separator_positions=[0], alignment={0: "center"}, table_width=25)
+                        self.game_flags.battle = False
+                        self.win.getch()
+                        break
+                
+                if self.hit == 1 or self.hit == -1:
+                    self.monster_attack(self.monster)
 
             d.da.stop_battle_music()
             d.da.play_background_music()
 
         def attack_monster(self, monster):
-            damage_multiplier = 2 if self.player.heroClass == "THIEF" else 1
+            self.hit = 1
+            damage_multiplier = 2 if self.player.heroClass == "THIEF" and self.equipment.weaponID != None and self.equipment.weapon2ID != None else 1
 
             if self.player.heroClass == "SWORDSMAN":
                 monster.hp -= math.ceil((self.player.Dm * damage_multiplier) * monster.p_resist)
@@ -548,13 +644,13 @@ class Event(BaseEvent):
                 self.game_flags.game_over = True
                 self.game_flags.battle = False
             
-            self.consolas.create_table(f"{monster.name} hits you, you have {player.Hp} HP left", alignment={0: "center"}, table_width=45)
+            self.consolas.create_table(f"{monster.name} hits you, you have {self.player.Hp} HP left", alignment={0: "center"}, table_width=45)
                 
                 
 
     class Shop(BaseEvent):
-        def __init__(self, player, config, equipment, game_flags, world_values, ability, resistances, consolas, save_manager, win, table_menu, item_meneger):
-            super().__init__(player, config, equipment, game_flags, world_values, ability, resistances, consolas, save_manager, win, table_menu, item_meneger)
+        def __init__(self, player, config, equipment, game_flags, world_values, ability, resistances, consolas, save_manager, win, table_menu, item_meneger, spells):
+            super().__init__(player, config, equipment, game_flags, world_values, ability, resistances, consolas, save_manager, win, table_menu, item_meneger, spells)
 
         def visit_shop(self, shop_type, phrases, items):
             self.options = ["exit"]
