@@ -18,7 +18,7 @@ class Monster:
         self.player = player
 
         random_monster = random.choice(list(md.forest.keys()))
-        while md.forest[random_monster]["Lv"] >= self.player.Lv + 2:
+        while md.forest[random_monster]["Lv"] >= self.player.Lv + 3:
             random_monster = random.choice(list(md.forest.keys()))
         self.name = md.forest[random_monster]["name"]
         self.hp = md.forest[random_monster]["Hp"]
@@ -203,6 +203,15 @@ class Event(BaseEvent):
                 self.game_flags.game_over = True
                 self.game_flags.battle = False
                 self.game_flags.play = False
+
+            if self.player.mana < self.player.maxMana:
+                if self.ability.ManaRecovery:
+                    self.player.mana += 5
+                else:
+                    self.player.mana += 2
+                    
+                if self.player.mana > self.player.maxMana:
+                    self.player.mana = self.player.maxMana
             
             return monstr_max
 
@@ -292,7 +301,7 @@ class Event(BaseEvent):
                         self.consolas.create_table("")
 
         def entrance_village(self, layer, player, Sx, Sy):
-            self.shop = self.Shop(
+            self.shop = Event.Shop(
                     self.player,
                     self.config,
                     self.equipment,
@@ -533,17 +542,22 @@ class Event(BaseEvent):
                 if self.monster.hp <= self.monster.max_hp * 0.5 and any(value in self.monster.item for value in [0, 1, 2]):
                     item = random.choice(self.monster.item)
                     if item == 0:
+                        self.monster.item.remove(0)
                         self.monster.hp += 10
-                        self.consolas.create_table("the monster drinks the potion, it restores 10 HP", separator_positions=[0], alignment={0: "center"}, table_width=32)
+                        self.consolas.create_table("the monster drinks the potion, it restores 10 HP", alignment={0: "center"}, table_width=32)
                         self.win.getch()
                     elif item == 1:
+                        self.monster.item.remove(1)
                         self.monster.hp += 20
-                        self.consolas.create_table("the monster drinks the potion, it restores 20 HP", separator_positions=[0], alignment={0: "center"}, table_width=32)
+                        self.consolas.create_table("the monster drinks the potion, it restores 20 HP", alignment={0: "center"}, table_width=32)
                         self.win.getch()
                     elif item == 2:
+                        self.monster.item.remove(2)
                         self.monster.hp += 30
-                        self.consolas.create_table("the monster drinks the potion, it restores 30 HP", separator_positions=[0], alignment={0: "center"}, table_width=32)
+                        self.consolas.create_table("the monster drinks the potion, it restores 30 HP", alignment={0: "center"}, table_width=32)
                         self.win.getch()
+                    if self.monster.hp > self.monster.max_hp:
+                        self.monster.hp = self.monster.max_hp
                     self.hit = 0
 
                 if self.monster.hp <= self.monster.max_hp * 0.2:
