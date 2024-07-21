@@ -441,7 +441,6 @@ class Event(BaseEvent):
             self.hit = 1
             self.game_flags.battle = True
             self.monster = Monster(self.player)
-            self.hit = 1
 
             megic_index = 1
             name_spells = ["exit"]
@@ -462,6 +461,7 @@ class Event(BaseEvent):
             self.monstr_win = d.curses.newwin(18, 13, 10, 10)
 
             while self.game_flags.battle:
+                self.hit = 1
 
                 self.consolas.create_table(
                     f"{self.monster.name}",
@@ -659,6 +659,7 @@ class Event(BaseEvent):
                 self.game_flags.battle = False
             
             self.consolas.create_table(f"{monster.name} hits you, you have {self.player.Hp} HP left", alignment={0: "center"}, table_width=45)
+            self.win.getch()
                 
                 
 

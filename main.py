@@ -111,7 +111,8 @@ class Game:
                 self.show_sub_menus()
 
             while self.game_flags.play:
-                self.consolas.play_animation(self.logo.text_rpg_logo, 0.2, y=5)
+                if self.config.anim:
+                    self.consolas.play_animation(self.logo.text_rpg_logo, 0.2, y=5)
                 self.save_manager.save_file()
                 self.show_game_menu()
 
@@ -268,7 +269,7 @@ class Game:
         elif self.player.heroClass == "THIEF":
             self.player.spells = [1]
         elif self.player.heroClass == "SWORDSMAN":
-            pass
+            self.player.spells = []
         elif self.player.heroClass == "NULL":
             self.player.spells = [0]
 
